@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import type { Question } from "@/lib/types"
@@ -24,49 +24,68 @@ export function CodeWritingQuestion({
   isFailed,
   userAnswer,
 }: CodeWritingQuestionProps) {
-  const [code, setCode] = useState(question.initialCode || "")
-  const [testResults, setTestResults] = useState<{ passed: boolean; message: string }[]>([])
-  const [isRunning, setIsRunning] = useState(false)
+  // Estado del código que escribe el usuario
+  const [code, setCode] = useState("")
+  
+  // Estado para almacenar resultados de pruebas
+  const [testResults, setTestResults] = useState<Array<{
+    passed: boolean;
+    message: string;
+  }>>([])
+  
+  // Estado para indicar si se están ejecutando pruebas
+  const [isRunningTests, setIsRunningTests] = useState(false)
+  
+  // Solución de ejemplo para mostrar en caso de error
   const [solutionCode, setSolutionCode] = useState<string | null>(null)
-
-  // Si la pregunta está completada o fallada, cargar la respuesta del usuario
+  
+  // Cuando cambia la pregunta, restablecer el código
   useEffect(() => {
+    // Inicializar con el código correspondiente
     if ((isCompleted || isFailed) && userAnswer) {
+      // Si ya se respondió, mostrar la respuesta del usuario
       setCode(userAnswer)
+    } else {
+      // Si es una pregunta nueva, mostrar el código inicial
+      setCode(question.initialCode || "")
     }
-
-    // Si la pregunta está completada o fallada, ejecutar las pruebas automáticamente
-    if ((isCompleted || isFailed) && question.testCases && testResults.length === 0) {
-      runTests()
-    }
-
-    // Si la pregunta está fallada, generar una solución de ejemplo
+    
+    // Limpiar resultados de pruebas previas
+    setTestResults([])
+  }, [question.id, question.initialCode, isCompleted, isFailed, userAnswer])
+  
+  // Generar solución de ejemplo cuando sea necesario
+  useEffect(() => {
     if (isFailed && !solutionCode && question.testCases) {
-      // Aquí podríamos generar una solución de ejemplo basada en los casos de prueba
-      // Por simplicidad, usaremos una solución predefinida para cada pregunta
-      if (question.id === 3) {
-        // Factorial
-        setSolutionCode(`function factorial(n) {
+      // Generar una solución específica según la pregunta
+      let solution = ""
+      
+      switch (question.id) {
+        case 3: // Factorial
+          solution = `function factorial(n) {
   if (n <= 1) return 1;
   return n * factorial(n - 1);
-}`)
-      } else if (question.id === 6) {
-        // Filtrar y transformar
-        setSolutionCode(`function filtrarYTransformar(numeros) {
+}`
+          break
+          
+        case 6: // Filtrar y transformar
+          solution = `function filtrarYTransformar(numeros) {
   return numeros
     .filter(num => num % 2 === 0)
     .map(num => num * num);
-}`)
-      } else if (question.id === 9) {
-        // Ejecutar N veces
-        setSolutionCode(`function ejecutarNVeces(fn, n) {
+}`
+          break
+          
+        case 9: // Ejecutar N veces
+          solution = `function ejecutarNVeces(fn, n) {
   for (let i = 0; i < n; i++) {
     fn();
   }
-}`)
-      } else if (question.id === 12) {
-        // Promisificar
-        setSolutionCode(`function leerArchivoPromise(ruta) {
+}`
+          break
+          
+        case 12: // Promisificar
+          solution = `function leerArchivoPromise(ruta) {
   return new Promise((resolve, reject) => {
     leerArchivo(ruta, (error, contenido) => {
       if (error) {
@@ -76,76 +95,87 @@ export function CodeWritingQuestion({
       }
     });
   });
-}`)
+}`
+          break
+      }
+      
+      if (solution) {
+        setSolutionCode(solution)
       }
     }
-  }, [isCompleted, isFailed, question.testCases, testResults.length, userAnswer, question.id, solutionCode])
+  }, [question.id, isFailed, solutionCode, question.testCases])
+  
+  // Ejecutar pruebas cuando se muestra el resultado guardado
+  useEffect(() => {
+    if ((isCompleted || isFailed) && question.testCases && code && testResults.length === 0) {
+      executeTests()
+    }
+  }, [isCompleted, isFailed, question.id, code])
+  
+  // Función para ejecutar pruebas sobre el código
+  const executeTests = useCallback(() => {
+    if (!code || !question.testCases || isRunningTests) return
 
-  const runTests = () => {
-    if (!code || !question.testCases) return
-
-    setIsRunning(true)
+    setIsRunningTests(true)
     setTestResults([])
-
+    
     try {
-      // Ejecutar cada caso de prueba
-      const results = question.testCases.map((testCase) => {
+      const results = question.testCases.map(testCase => {
         try {
-          // Combinar el código del usuario con el caso de prueba
+          // Preparar el código completo con el caso de prueba
           const fullCode = `
             ${code}
             ${testCase.input}
           `
-
-          // Evaluar el código completo
+          
+          // Evaluar el código
           const result = eval(fullCode)
           const expected = eval(testCase.expectedOutput)
-
-          // Comparar resultado con esperado
+          
+          // Verificar si la salida coincide con la esperada
           const passed = JSON.stringify(result) === JSON.stringify(expected)
-
+          
           return {
             passed,
-            message: passed
+            message: passed 
               ? `Prueba pasada: ${testCase.input} = ${testCase.expectedOutput}`
-              : `Prueba fallida: ${testCase.input} produjo ${JSON.stringify(result)}, se esperaba ${testCase.expectedOutput}`,
+              : `Prueba fallida: ${testCase.input} produjo ${JSON.stringify(result)}, se esperaba ${testCase.expectedOutput}`
           }
         } catch (error) {
           return {
             passed: false,
-            message: `Error al ejecutar ${testCase.input}: ${error instanceof Error ? error.message : String(error)}`,
+            message: `Error al ejecutar ${testCase.input}: ${error instanceof Error ? error.message : String(error)}`
           }
         }
       })
-
+      
       setTestResults(results)
     } catch (error) {
-      setTestResults([
-        {
-          passed: false,
-          message: `Error al compilar el código: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ])
+      setTestResults([{
+        passed: false,
+        message: `Error al compilar el código: ${error instanceof Error ? error.message : String(error)}`
+      }])
     } finally {
-      setIsRunning(false)
+      setIsRunningTests(false)
     }
-  }
-
-  const handleSubmit = () => {
-    if (!code) return
-
-    // Ejecutar pruebas antes de enviar
-    try {
-      // Verificar si todas las pruebas pasan
-      if (question.testCases) {
-        const allTestsPassed = question.testCases.every((testCase) => {
+  }, [code, question.testCases, isRunningTests])
+  
+  // Función para enviar la respuesta
+  const handleSubmit = useCallback(() => {
+    if (!code || isSubmitting || isRunningTests) return
+    
+    if (question.testCases) {
+      // Si hay pruebas, ejecutarlas primero
+      setIsRunningTests(true)
+      
+      try {
+        // Verificar si todas las pruebas pasan
+        const allPass = question.testCases.every(testCase => {
           try {
-            // Combinar el código del usuario con el caso de prueba
             const fullCode = `
               ${code}
               ${testCase.input}
             `
-
             const result = eval(fullCode)
             const expected = eval(testCase.expectedOutput)
             return JSON.stringify(result) === JSON.stringify(expected)
@@ -153,99 +183,156 @@ export function CodeWritingQuestion({
             return false
           }
         })
-
-        // Solo enviar si todas las pruebas pasan
-        if (allTestsPassed) {
+        
+        if (allPass) {
+          // Si todas pasan, enviar la respuesta
           onSubmit(code)
         } else {
-          setTestResults([
-            {
-              passed: false,
-              message: "No todas las pruebas han pasado. Revisa tu código e intenta de nuevo.",
-            },
-          ])
+          // Si alguna falla, mostrar mensaje
+          setTestResults([{
+            passed: false,
+            message: "No todas las pruebas han pasado. Revisa tu código e intenta de nuevo."
+          }])
         }
-      } else {
-        // Si no hay pruebas, verificar palabras clave
-        onSubmit(code)
-      }
-    } catch (error) {
-      setTestResults([
-        {
+      } catch (error) {
+        setTestResults([{
           passed: false,
-          message: `Error al compilar el código: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ])
+          message: `Error al compilar el código: ${error instanceof Error ? error.message : String(error)}`
+        }])
+      } finally {
+        setIsRunningTests(false)
+      }
+    } else {
+      // Si no hay pruebas, enviar directamente
+      onSubmit(code)
     }
-  }
-
+  }, [code, isSubmitting, isRunningTests, question.testCases, onSubmit])
+  
+  // Determinar si el formulario está deshabilitado
+  const isDisabled = isSubmitting || isCompleted || isFailed
+  
   return (
     <div className="space-y-4">
+      {/* Instrucciones */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
         <p className="text-blue-700 dark:text-blue-300 text-sm">
           Escribe el código que resuelva el problema planteado.
         </p>
       </div>
-
+      
+      {/* Editor de código */}
       <Textarea
         value={code}
-        onChange={(e) => setCode(e.target.value)}
+        onChange={(e) => !isDisabled && setCode(e.target.value)}
         className="font-mono h-64 code-editor"
-        disabled={isSubmitting || isCompleted || isFailed}
+        disabled={isDisabled}
+        spellCheck={false}
       />
-
+      
+      {/* Resultados de pruebas */}
       {testResults.length > 0 && !isCompleted && (
         <div className="space-y-2">
           {testResults.map((result, index) => (
             <Alert key={index} variant={result.passed ? "default" : "destructive"}>
-              {result.passed ? <CheckIcon className="h-4 w-4 mr-2" /> : <XIcon className="h-4 w-4 mr-2" />}
+              {result.passed ? 
+                <CheckIcon className="h-4 w-4 mr-2" /> : 
+                <XIcon className="h-4 w-4 mr-2" />
+              }
               <AlertTitle>{result.passed ? "Prueba exitosa" : "Prueba fallida"}</AlertTitle>
               <AlertDescription>{result.message}</AlertDescription>
             </Alert>
           ))}
         </div>
       )}
-
-      <div className="flex gap-2">
+      
+      {/* Controles */}
+      <div className="flex gap-2 flex-wrap">
         <Button
           variant="outline"
-          onClick={runTests}
-          disabled={!code || isRunning || isSubmitting || (isFailed && !userAnswer) || isCompleted}
+          onClick={executeTests}
+          disabled={!code || isRunningTests || isDisabled}
           className="flex items-center gap-2"
         >
           <PlayIcon className="h-4 w-4" />
-          {isRunning ? "Ejecutando..." : "Ejecutar pruebas"}
+          {isRunningTests ? "Ejecutando..." : "Ejecutar pruebas"}
         </Button>
-
+        
         {!isCompleted && !isFailed && (
-          <Button onClick={handleSubmit} disabled={!code || isSubmitting || isRunning}>
-            {isSubmitting ? "Enviando..." : "Enviar código"}
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!code || isSubmitting || isRunningTests}
+          >
+            {isSubmitting ? "Verificando..." : "Enviar código"}
           </Button>
         )}
       </div>
-
+      
+      {/* Retroalimentación cuando la respuesta es correcta */}
       {isCompleted && (
-        <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-md">
-          <p className="text-green-700 dark:text-green-300 flex items-center">
-            <CheckIcon className="h-5 w-5 mr-2" /> Ya has completado esta pregunta correctamente.
+        <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-md border-2 border-green-300">
+          <p className="text-green-700 dark:text-green-300 flex items-center font-semibold">
+            <CheckIcon className="h-5 w-5 mr-2" /> ¡Excelente! Has completado esta pregunta correctamente.
           </p>
-          <p className="text-green-700 dark:text-green-300 mt-1 text-sm">
-            Tu solución se muestra en el editor. Puedes ejecutar las pruebas para ver los resultados.
-          </p>
+          
+          {testResults.length > 0 && (
+            <div className="mt-2">
+              <p className="text-green-700 dark:text-green-300 mb-2 text-sm font-medium">
+                Todos los casos de prueba pasaron:
+              </p>
+              <div className="space-y-2">
+                {testResults.map((result, idx) => (
+                  <div key={idx} className="text-xs bg-green-100 dark:bg-green-900/30 p-2 rounded-md">
+                    <span className="font-mono">{result.message}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
-
-      {isFailed && solutionCode && (
-        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-md">
-          <p className="text-red-700 dark:text-red-300 flex items-center">
-            <XIcon className="h-5 w-5 mr-2" /> Has fallado esta pregunta.
+      
+      {/* Retroalimentación cuando la respuesta es incorrecta */}
+      {isFailed && !isCompleted && (
+        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-md border-2 border-red-300">
+          <p className="text-red-700 dark:text-red-300 flex items-center font-semibold">
+            <XIcon className="h-5 w-5 mr-2" /> Respuesta incorrecta
           </p>
-          <p className="text-red-700 dark:text-red-300 mt-1 text-sm">
-            Tu respuesta se muestra en el editor. Una posible solución correcta es:
-          </p>
-          <pre className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-md overflow-x-auto text-sm">{solutionCode}</pre>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-            Puedes continuar con la siguiente pregunta usando el botón "Siguiente".
+          
+          {testResults.length > 0 && (
+            <div className="mt-2">
+              <p className="text-red-700 dark:text-red-300 mb-2 text-sm font-medium">
+                Resultados de las pruebas:
+              </p>
+              <div className="space-y-2">
+                {testResults.map((result, idx) => (
+                  <div
+                    key={idx}
+                    className={`text-xs p-2 rounded-md ${
+                      result.passed
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                        : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                    }`}
+                  >
+                    <span className="font-mono">{result.message}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {solutionCode && (
+            <div className="mt-3">
+              <p className="text-red-700 dark:text-red-300 mb-2 text-sm font-medium">
+                Una posible solución:
+              </p>
+              <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded-md overflow-x-auto text-sm border border-gray-300 dark:border-gray-700">
+                {solutionCode}
+              </pre>
+            </div>
+          )}
+          
+          <p className="text-gray-600 dark:text-gray-400 mt-3">
+            Pulsa "Siguiente" para continuar con la siguiente pregunta.
           </p>
         </div>
       )}

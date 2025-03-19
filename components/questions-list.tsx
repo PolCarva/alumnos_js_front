@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CheckIcon, XIcon, AlertCircleIcon } from "lucide-react"
-import type { Question, UserProgress } from "@/lib/types"
+import type { Question, UserProgress, QuestionProgress } from "@/lib/types"
 import { MultipleChoiceQuestion } from "./multiple-choice"
 import { BugFixQuestion } from "./bug-fix"
 import { CodeWritingQuestion } from "./code-writing"
@@ -26,6 +26,14 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [localUserProgress, setLocalUserProgress] = useState<UserProgress>(userProgress)
   const [showingAnswerFeedback, setShowingAnswerFeedback] = useState(false)
+  const [questionStatuses, setQuestionStatuses] = useState<Array<{
+    id: number;
+    title: string;
+    points: number;
+    completed: boolean;
+    failed: boolean;
+  }>>([])
+  const [questionProgress, setQuestionProgress] = useState<QuestionProgress | null>(null)
   const currentIndexRef = useRef(currentQuestionIndex)
   const router = useRouter()
   const { toast } = useToast()
@@ -36,85 +44,99 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
   }, [currentQuestionIndex])
 
   // Efecto para actualizar el progreso local cuando cambia el progreso del usuario
-  // pero manteniendo el índice de pregunta actual
   useEffect(() => {
     setLocalUserProgress(userProgress)
-  }, [userProgress])
-
+    
+    // Calcular el estado de cada pregunta
+    const statuses = questions.map(question => {
+      const progress = userProgress.questionProgress.find(p => p.questionId === question.id)
+      return {
+        id: question.id,
+        title: question.title,
+        points: question.points,
+        completed: progress?.completed || false,
+        failed: progress?.failed || false
+      }
+    })
+    
+    setQuestionStatuses(statuses)
+  }, [userProgress, questions])
+  
   const currentQuestion = questions[currentQuestionIndex]
 
   // Verificar si la pregunta ya fue completada o fallada
-  const questionProgress = localUserProgress.questionProgress.find((q) => q.questionId === currentQuestion.id)
+  useEffect(() => {
+    const progress = localUserProgress.questionProgress.find(
+      (q) => q.questionId === currentQuestion?.id
+    )
+    setQuestionProgress(progress || null)
+  }, [localUserProgress, currentQuestion])
+
+  // Asegurar que los componentes de preguntas se reinicien cuando cambia el índice de pregunta
+  // para evitar que la respuesta anterior se mantenga en la nueva pregunta
+  useEffect(() => {
+    // Limpiar la retroalimentación solo cuando el usuario cambie de pregunta explícitamente
+    setShowingAnswerFeedback(false);
+    
+    // Buscar el progreso de la nueva pregunta seleccionada
+    const progress = localUserProgress.questionProgress.find(
+      (q) => q.questionId === questions[currentQuestionIndex]?.id
+    );
+    
+    // Actualizar el progreso actual
+    setQuestionProgress(progress || null);
+    
+    console.log(`Cambiando a pregunta #${currentQuestionIndex + 1}, progreso:`, progress);
+  }, [currentQuestionIndex, localUserProgress.questionProgress, questions]);
 
   const isQuestionCompleted = questionProgress?.completed || false
   const isQuestionFailed = questionProgress?.failed || false
   const userAnswer = questionProgress?.userAnswer
 
-  // Calcular el estado de cada pregunta
-  const questionStatuses = questions.map(question => {
-    const progress = localUserProgress.questionProgress.find(p => p.questionId === question.id)
-    return {
-      id: question.id,
-      title: question.title,
-      points: question.points,
-      completed: progress?.completed || false,
-      failed: progress?.failed || false
-    }
-  })
-
-  const handleSubmitAnswer = async (answer: any) => {
-    // Si la pregunta ya está completada, no permitir enviar respuesta
-    if (isQuestionCompleted) {
-      toast({
-        title: "Pregunta ya completada",
-        description: "Esta pregunta ya ha sido completada correctamente.",
-        variant: "default",
-      })
-      return
-    }
-
+  const handleSubmitAnswer = async (answer: string | string[], questionType: string) => {
+    if (isSubmitting) return
+    
     setIsSubmitting(true)
     setShowingAnswerFeedback(true)
-
+    
     try {
-      const isCorrect = checkAnswer(currentQuestion, answer)
-      const points = isCorrect ? currentQuestion.points : 0
-
-      // Guardar progreso en la base de datos
+      const result = await checkAnswer(currentQuestion.id, answer, questionType)
+      
+      // Crear objeto de progreso
+      const userProgressData: QuestionProgress = {
+        userId,
+        weekId,
+        questionId: currentQuestion.id,
+        completed: result.correct,
+        failed: !result.correct,
+        points: result.correct ? currentQuestion.points : 0,
+        userAnswer: typeof answer === 'string' ? answer : answer.join(',')
+      }
+      
+      // Guardar progreso en el servidor y esperar a que se complete
       try {
         await saveQuestionProgress(
           userId,
           weekId,
           currentQuestion.id,
-          isCorrect,
-          points,
-          !isCorrect, // Si no es correcta, marcarla como fallada
-          answer.toString(), // Guardar la respuesta del usuario
+          result.correct,
+          userProgressData.points,
+          !result.correct,
+          typeof answer === 'string' ? answer : answer.join(',')
         )
-
-        // Actualizar el progreso local después de guardar en DB
-        const updatedProgress = {...localUserProgress}
         
-        // Buscar si ya existe un registro para esta pregunta
+        console.log("Progreso guardado correctamente en servidor");
+        
+        // Sólo después de guardar exitosamente, actualizar el estado local
+        const updatedProgress = {...localUserProgress}
         const existingIndex = updatedProgress.questionProgress.findIndex(
           q => q.questionId === currentQuestion.id && q.weekId === weekId
         )
         
-        // Actualizar o crear el registro de progreso
-        const newProgressItem = {
-          userId,
-          weekId,
-          questionId: currentQuestion.id,
-          completed: isCorrect,
-          points,
-          failed: !isCorrect,
-          userAnswer: answer.toString()
-        }
-        
         if (existingIndex >= 0) {
-          updatedProgress.questionProgress[existingIndex] = newProgressItem
+          updatedProgress.questionProgress[existingIndex] = userProgressData
         } else {
-          updatedProgress.questionProgress.push(newProgressItem)
+          updatedProgress.questionProgress.push(userProgressData)
         }
         
         // Actualizar contadores
@@ -124,133 +146,221 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
         updatedProgress.completedQuestions = completedQuestions
         updatedProgress.totalPoints = totalPoints
         
+        // Actualizar el estado local
         setLocalUserProgress(updatedProgress)
-
+        setQuestionProgress(userProgressData)
+        
+        // Actualizar el estado local de la pregunta en la lista
+        const newStatuses = [...questionStatuses]
+        const statusIndex = newStatuses.findIndex(s => s.id === currentQuestion.id)
+        if (statusIndex >= 0) {
+          newStatuses[statusIndex] = {
+            ...newStatuses[statusIndex],
+            completed: result.correct,
+            failed: !result.correct,
+            points: result.correct ? currentQuestion.points : 0
+          }
+          setQuestionStatuses(newStatuses)
+        }
+        
         // Si se proporcionó la función onQuestionComplete, llamarla
-        // pero guardando el índice actual para restaurarlo después
-        if (onQuestionComplete) {
+        if (onQuestionComplete && result.correct) {
           await onQuestionComplete()
         }
       } catch (error) {
-        console.error("Error al guardar progreso:", error)
+        console.error("Error al guardar progreso en servidor:", error)
+        // En caso de error, mostrar mensaje pero aún actualizar la UI local
         toast({
           title: "Error al guardar progreso",
-          description: "Se ha guardado localmente, pero no se pudo guardar en el servidor.",
+          description: "No se pudo guardar en el servidor, pero se ha actualizado localmente.",
           variant: "destructive",
         })
       }
-
-      // Mostrar toast con resultado
+      
+      // Sólo desactivar el estado de envío pero mantener el feedback visible
+      setIsSubmitting(false)
+      
+      // Mostrar toast con el resultado
       toast({
-        title: isCorrect ? "¡Respuesta correcta!" : "Respuesta incorrecta",
-        description: isCorrect
-          ? `Has ganado ${points} puntos.`
-          : "La respuesta es incorrecta. Se mostrará la solución correcta.",
-        variant: isCorrect ? "default" : "destructive",
+        title: result.correct ? "¡Respuesta correcta!" : "Respuesta incorrecta",
+        description: result.correct 
+          ? `Has ganado ${userProgressData.points} puntos. Pulsa "Siguiente" para continuar.` 
+          : "Puedes ver la solución y pulsar 'Siguiente' cuando quieras pasar a la siguiente pregunta.",
+        variant: result.correct ? "default" : "destructive",
+        duration: 4000, // 4 segundos
       })
-
-      // Si es correcta, avanzar a la siguiente pregunta automáticamente después de un breve retraso
-      if (isCorrect) {
-        setTimeout(() => {
-          setShowingAnswerFeedback(false)
-          if (currentIndexRef.current < questions.length - 1) {
-            setCurrentQuestionIndex(currentIndexRef.current + 1)
-          } else {
-            // Si es la última pregunta, redirigir al dashboard
-            router.push("/dashboard")
-          }
-        }, 2000)
-      } else {
-        // Si es incorrecta, permitir que el usuario avance manualmente
-        // pero mostrar un mensaje indicando que puede continuar
-        toast({
-          title: "Puedes continuar",
-          description: "Aunque la respuesta es incorrecta, puedes avanzar a la siguiente pregunta.",
-          variant: "default",
-        })
-      }
     } catch (error) {
+      console.error("Error al verificar la respuesta:", error)
       toast({
         title: "Error",
-        description: "Ocurrió un error al procesar tu respuesta",
+        description: "Hubo un problema al verificar tu respuesta. Inténtalo de nuevo.",
         variant: "destructive",
       })
-    } finally {
       setIsSubmitting(false)
+      // No resetear el feedback en caso de error
     }
   }
 
-  const checkAnswer = (question: Question, answer: any): boolean => {
-    switch (question.type) {
-      case "multiple-choice":
-        return answer === question.correctAnswer
-      case "bug-fix":
-        return answer === question.correctCode
-      case "code-writing":
-        if (question.testCases) {
-          try {
-            // Verificar si todas las pruebas pasan
-            return question.testCases.every((testCase) => {
+  const checkAnswer = (questionId: number, answer: string | string[], questionType: string): Promise<{ correct: boolean; points?: number }> => {
+    console.log(`Verificando respuesta para pregunta #${questionId}, tipo: ${questionType}`);
+    
+    return new Promise((resolve, reject) => {
+      try {
+        // Implementa la lógica para verificar la respuesta según el tipo de pregunta
+        switch (questionType) {
+          case "multiple-choice":
+            console.log(`Comparando respuesta: "${answer}" con correcta: "${currentQuestion.correctAnswer}"`);
+            const isCorrect = answer === currentQuestion.correctAnswer;
+            resolve({ 
+              correct: isCorrect,
+              points: isCorrect ? currentQuestion.points : 0
+            });
+            break;
+            
+          case "bug-fix":
+            console.log(`Comparando código arreglado con solución correcta`);
+            const isFixed = answer === currentQuestion.correctCode;
+            resolve({ 
+              correct: isFixed,
+              points: isFixed ? currentQuestion.points : 0
+            });
+            break;
+            
+          case "code-writing":
+            if (currentQuestion.testCases && currentQuestion.testCases.length > 0) {
+              console.log(`Ejecutando ${currentQuestion.testCases.length} casos de prueba`);
               try {
-                // Combinar el código del usuario con el caso de prueba
-                const fullCode = `
-                  ${answer}
-                  ${testCase.input}
-                `
+                // Verificar si todas las pruebas pasan
+                const answerStr = typeof answer === 'string' ? answer : answer.join('\n');
+                const testCases = currentQuestion.testCases;
+                const results = testCases.map(testCase => {
+                  try {
+                    // Combinar el código del usuario con el caso de prueba
+                    const fullCode = `
+                      ${answerStr}
+                      ${testCase.input}
+                    `;
 
-                const result = eval(fullCode)
-                const expected = eval(testCase.expectedOutput)
-                return JSON.stringify(result) === JSON.stringify(expected)
-              } catch {
-                return false
+                    const result = eval(fullCode);
+                    const expected = eval(testCase.expectedOutput);
+                    const passed = JSON.stringify(result) === JSON.stringify(expected);
+                    console.log(`Test: ${testCase.input} - ${passed ? 'PASÓ' : 'FALLÓ'}`);
+                    return passed;
+                  } catch (error) {
+                    console.error(`Error en test: ${testCase.input}`, error);
+                    return false;
+                  }
+                });
+                
+                const correct = results.every(Boolean);
+                console.log(`Resultado final: ${correct ? 'CORRECTO' : 'INCORRECTO'}`);
+                
+                resolve({ 
+                  correct,
+                  points: correct ? currentQuestion.points : 0
+                });
+              } catch (error) {
+                console.error("Error al verificar las pruebas:", error);
+                resolve({ correct: false, points: 0 });
               }
-            })
-          } catch {
-            return false
-          }
-        } else {
-          // Si no hay pruebas, verificar palabras clave (método antiguo)
-          return question.keywords?.every((keyword) => answer.toLowerCase().includes(keyword.toLowerCase())) || false
+            } else if (currentQuestion.keywords && currentQuestion.keywords.length > 0) {
+              // Si no hay pruebas pero hay palabras clave, verificar con ellas
+              console.log(`Verificando palabras clave: ${currentQuestion.keywords.join(', ')}`);
+              const answerStr = typeof answer === 'string' ? answer.toLowerCase() : answer.join(' ').toLowerCase();
+              const correct = currentQuestion.keywords.some(keyword => 
+                answerStr.includes(keyword.toLowerCase())
+              );
+              
+              console.log(`Resultado palabras clave: ${correct ? 'CORRECTO' : 'INCORRECTO'}`);
+              resolve({ 
+                correct,
+                points: correct ? currentQuestion.points : 0
+              });
+            } else {
+              // Si no hay forma de verificar, rechazar
+              console.warn("No hay forma de verificar esta pregunta (sin pruebas ni palabras clave)");
+              reject(new Error("No hay forma de verificar esta pregunta"));
+            }
+            break;
+            
+          default:
+            console.error(`Tipo de pregunta no soportado: ${questionType}`);
+            reject(new Error(`Tipo de pregunta no soportado: ${questionType}`));
         }
-      default:
-        return false
-    }
+      } catch (error) {
+        console.error("Error inesperado al verificar respuesta:", error);
+        reject(error);
+      }
+    });
   }
 
   const renderQuestionComponent = () => {
+    // Usamos una clave única para cada pregunta para forzar recreación del componente
+    const questionKey = `question-${currentQuestion.id}-${currentQuestionIndex}`;
+    
     switch (currentQuestion.type) {
       case "multiple-choice":
         return (
-          <MultipleChoiceQuestion
-            question={currentQuestion}
-            onSubmit={handleSubmitAnswer}
-            isSubmitting={isSubmitting}
-            isCompleted={isQuestionCompleted}
-            isFailed={isQuestionFailed}
-            userAnswer={userAnswer}
-          />
+          <>
+            <MultipleChoiceQuestion
+              key={questionKey}
+              question={currentQuestion}
+              onSubmit={(answer) => handleSubmitAnswer(answer, "multiple-choice")}
+              isSubmitting={isSubmitting}
+              isCompleted={isQuestionCompleted}
+              isFailed={isQuestionFailed}
+              userAnswer={userAnswer}
+            />
+            {isSubmitting && showingAnswerFeedback && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <p className="text-blue-700 dark:text-blue-300 flex items-center">
+                  <AlertCircleIcon className="h-5 w-5 mr-2" /> Verificando respuesta...
+                </p>
+              </div>
+            )}
+          </>
         )
       case "bug-fix":
         return (
-          <BugFixQuestion
-            question={currentQuestion}
-            onSubmit={handleSubmitAnswer}
-            isSubmitting={isSubmitting}
-            isCompleted={isQuestionCompleted}
-            isFailed={isQuestionFailed}
-            userAnswer={userAnswer}
-          />
+          <>
+            <BugFixQuestion
+              key={questionKey}
+              question={currentQuestion}
+              onSubmit={(answer) => handleSubmitAnswer(answer, "bug-fix")}
+              isSubmitting={isSubmitting}
+              isCompleted={isQuestionCompleted}
+              isFailed={isQuestionFailed}
+              userAnswer={userAnswer}
+            />
+            {isSubmitting && showingAnswerFeedback && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <p className="text-blue-700 dark:text-blue-300 flex items-center">
+                  <AlertCircleIcon className="h-5 w-5 mr-2" /> Verificando respuesta...
+                </p>
+              </div>
+            )}
+          </>
         )
       case "code-writing":
         return (
-          <CodeWritingQuestion
-            question={currentQuestion}
-            onSubmit={handleSubmitAnswer}
-            isSubmitting={isSubmitting}
-            isCompleted={isQuestionCompleted}
-            isFailed={isQuestionFailed}
-            userAnswer={userAnswer}
-          />
+          <>
+            <CodeWritingQuestion
+              key={questionKey}
+              question={currentQuestion}
+              onSubmit={(answer) => handleSubmitAnswer(answer, "code-writing")}
+              isSubmitting={isSubmitting}
+              isCompleted={isQuestionCompleted}
+              isFailed={isQuestionFailed}
+              userAnswer={userAnswer}
+            />
+            {isSubmitting && showingAnswerFeedback && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                <p className="text-blue-700 dark:text-blue-300 flex items-center">
+                  <AlertCircleIcon className="h-5 w-5 mr-2" /> Verificando respuesta...
+                </p>
+              </div>
+            )}
+          </>
         )
       default:
         return <p>Tipo de pregunta no soportado</p>
@@ -296,65 +406,131 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
               ${currentQuestionIndex === index ? "ring-2 ring-offset-2" : ""}
             `}
             onClick={() => {
-              setShowingAnswerFeedback(false)
-              setCurrentQuestionIndex(index)
+              // Solo cambiar de pregunta si no estamos en medio de un envío
+              if (!isSubmitting) {
+                setCurrentQuestionIndex(index)
+              } else {
+                toast({
+                  title: "Espera un momento",
+                  description: "Estamos procesando tu respuesta. Por favor espera.",
+                  variant: "default",
+                })
+              }
             }}
           >
             {index + 1}
-            {q.completed && <CheckIcon className="ml-1 h-3 w-3" />}
-            {q.failed && !q.completed && <XIcon className="ml-1 h-3 w-3" />}
           </Button>
         ))}
       </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
-          Pregunta {currentQuestionIndex + 1} de {questions.length}
-        </h2>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">Dificultad:</span>
-          {getPointsBadge(currentQuestion.points)}
-        </div>
-      </div>
-
-      <Card>
+      {/* Pregunta actual */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>{currentQuestion.title}</CardTitle>
-          <CardDescription>{currentQuestion.description}</CardDescription>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle>{currentQuestion.title}</CardTitle>
+              <CardDescription className="mt-1">Pregunta {currentQuestionIndex + 1} de {questions.length}</CardDescription>
+            </div>
+            <div>{getPointsBadge(currentQuestion.points)}</div>
+          </div>
         </CardHeader>
-
-        <CardContent>{renderQuestionComponent()}</CardContent>
+        
+        <CardContent>
+          <div className="mb-4">
+            <p className="mb-4">{currentQuestion.description}</p>
+          </div>
+          
+          {renderQuestionComponent()}
+          
+          {/* Mostrar feedback con resultado de verificación */}
+          {showingAnswerFeedback && questionProgress && (
+            <div className={`mt-6 p-4 ${questionProgress.completed ? 
+              "bg-green-50 dark:bg-green-900/20 border-2 border-green-300" : 
+              "bg-red-50 dark:bg-red-900/20 border-2 border-red-300"} rounded-md shadow-sm`}>
+              <p className={`flex items-center font-semibold text-lg ${questionProgress.completed ? 
+                "text-green-700 dark:text-green-300" : 
+                "text-red-700 dark:text-red-300"}`}>
+                {questionProgress.completed ? 
+                  <><CheckIcon className="h-6 w-6 mr-2" /> ¡Respuesta correcta!</> : 
+                  <><XIcon className="h-6 w-6 mr-2" /> Respuesta incorrecta</>}
+              </p>
+              <p className={`mt-2 ${questionProgress.completed ? 
+                "text-green-600 dark:text-green-400" : 
+                "text-red-600 dark:text-red-400"}`}>
+                {questionProgress.completed ? 
+                  `Has ganado ${questionProgress.points} puntos. Pulsa "Siguiente" para continuar.` : 
+                  "La respuesta es incorrecta. Puedes consultar la solución correcta arriba y pulsar 'Siguiente' cuando estés listo."}
+              </p>
+              <div className="mt-3 text-right">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`${questionProgress.completed ? 
+                    "border-green-300 text-green-700 hover:bg-green-50" : 
+                    "border-red-300 text-red-700 hover:bg-red-50"}`}
+                  onClick={() => {
+                    // Avanzar a la siguiente pregunta (mismo comportamiento que el botón Siguiente)
+                    setShowingAnswerFeedback(false)
+                    if (currentQuestionIndex < questions.length - 1) {
+                      setCurrentQuestionIndex(currentQuestionIndex + 1)
+                    } else {
+                      router.push("/dashboard")
+                    }
+                  }}
+                >
+                  {currentQuestionIndex === questions.length - 1 ? "Finalizar" : "Siguiente pregunta →"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
 
         <CardFooter className="flex justify-between">
           <Button
             variant="outline"
             onClick={() => {
-              if (currentQuestionIndex > 0) {
-                setShowingAnswerFeedback(false)
-                setCurrentQuestionIndex(currentQuestionIndex - 1)
+              // Solo permitir navegar si no estamos en medio de un envío
+              if (!isSubmitting) {
+                if (currentQuestionIndex > 0) {
+                  setCurrentQuestionIndex(currentQuestionIndex - 1)
+                }
+              } else {
+                toast({
+                  title: "Espera un momento",
+                  description: "Estamos procesando tu respuesta. Por favor espera.",
+                  variant: "default",
+                })
               }
             }}
-            disabled={currentQuestionIndex === 0}
+            disabled={currentQuestionIndex === 0 || isSubmitting}
           >
             Anterior
           </Button>
-
+          
           <Button
             onClick={() => {
-              if (currentQuestionIndex < questions.length - 1) {
-                setShowingAnswerFeedback(false)
-                setCurrentQuestionIndex(currentQuestionIndex + 1)
+              // Solo permitir navegar si no estamos en medio de un envío
+              if (!isSubmitting) {
+                if (currentQuestionIndex < questions.length - 1) {
+                  setCurrentQuestionIndex(currentQuestionIndex + 1)
+                } else {
+                  router.push("/dashboard")
+                }
               } else {
-                router.push("/dashboard")
+                toast({
+                  title: "Espera un momento",
+                  description: "Estamos procesando tu respuesta. Por favor espera.",
+                  variant: "default",
+                })
               }
             }}
-            disabled={isSubmitting}
+            disabled={(currentQuestionIndex === questions.length - 1 && !isQuestionCompleted && !isQuestionFailed && !showingAnswerFeedback) || isSubmitting}
+            className={showingAnswerFeedback && (isQuestionCompleted || isQuestionFailed) ? "animate-pulse bg-blue-600 hover:bg-blue-700" : ""}
           >
-            {currentQuestionIndex < questions.length - 1 ? "Siguiente" : "Finalizar"}
+            {currentQuestionIndex === questions.length - 1 ? "Finalizar" : "Siguiente"}
           </Button>
         </CardFooter>
       </Card>
     </div>
   )
 }
-

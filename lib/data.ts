@@ -363,7 +363,7 @@ export function getAllUsersProgress(): UserProgress[] {
 }
 
 // Guardar progreso de una pregunta
-export function saveQuestionProgress(
+export async function saveQuestionProgress(
   userId: number,
   weekId: number,
   questionId: number,
@@ -371,19 +371,20 @@ export function saveQuestionProgress(
   points: number,
   failed = false,
   userAnswer?: string,
-): void {
+): Promise<void> {
+  console.log(`Guardando progreso - Usuario: ${userId}, Semana: ${weekId}, Pregunta: ${questionId}, Completada: ${completed}`);
+  
   try {
+    // Guardar localmente primero para tener respuesta inmediata en la UI
+    saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer);
+    
     // Intentar guardar en el backend
-    apiSaveQuestionProgress(userId, weekId, questionId, completed, points, failed, userAnswer)
-      .catch(error => {
-        console.error("Error guardando en el backend:", error)
-        // Si falla, guardar localmente como fallback
-        saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer)
-      })
+    await apiSaveQuestionProgress(userId, weekId, questionId, completed, points, failed, userAnswer);
+    console.log("✓ Progreso guardado en el servidor correctamente");
   } catch (error) {
-    console.error("Error guardando progreso:", error)
-    // Fallback a guardado local
-    saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer)
+    console.error("Error guardando en el backend:", error);
+    // Ya se guardó localmente, así que no hace falta volver a hacerlo
+    console.log("✓ Progreso guardado localmente como fallback");
   }
 }
 
