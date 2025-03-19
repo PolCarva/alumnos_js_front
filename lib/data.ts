@@ -276,25 +276,85 @@ export function getQuestionsForWeek(weekId: number): Question[] {
   return questions.filter((question) => question.weekId === weekId)
 }
 
+// Función para inicializar datos desde localStorage
+function initializeFromLocalStorage() {
+  if (typeof window === 'undefined') return;
+  
+  const storedUsersProgress = localStorage.getItem('usersProgress');
+  if (storedUsersProgress) {
+    try {
+      const parsedData = JSON.parse(storedUsersProgress);
+      // Actualizar los datos en memoria con los guardados en localStorage
+      parsedData.forEach((storedProgress: UserProgress) => {
+        const index = usersProgress.findIndex(p => p.userId === storedProgress.userId);
+        if (index >= 0) {
+          usersProgress[index] = storedProgress;
+        } else {
+          usersProgress.push(storedProgress);
+        }
+      });
+    } catch (error) {
+      console.error('Error parsing usersProgress from localStorage:', error);
+    }
+  }
+}
+
+// Función para guardar datos en localStorage
+function saveToLocalStorage() {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('usersProgress', JSON.stringify(usersProgress));
+}
+
+// Inicializar datos al cargar el módulo
+if (typeof window !== 'undefined') {
+  initializeFromLocalStorage();
+}
+
+// Actualizar la función updateUserProgress para guardar en localStorage
+export function updateUserProgress(updatedUserProgress: UserProgress): void {
+  const index = usersProgress.findIndex(up => up.userId === updatedUserProgress.userId);
+  
+  if (index !== -1) {
+    usersProgress[index] = { ...updatedUserProgress };
+  } else {
+    usersProgress.push({ ...updatedUserProgress });
+  }
+  
+  // Guardar en localStorage
+  saveToLocalStorage();
+}
+
 // Obtener progreso de un usuario
 export function getUserProgress(userId: number): UserProgress {
-  let userProgress = usersProgress.find((progress) => progress.userId === userId)
-
-  // Si no existe, crear un progreso vacío
+  const userProgress = usersProgress.find(up => up.userId === userId);
+  
   if (!userProgress) {
-    userProgress = {
+    // Si no existe, creamos un progreso inicial para el usuario
+    const newUserProgress: UserProgress = {
       userId,
-      userName: "Usuario",
+      userName: `Usuario ${userId}`, // Nombre temporal
       totalPoints: 0,
       completedQuestions: 0,
       completedWeeks: 0,
       completedWeekIds: [],
-      questionProgress: [],
-    }
-    usersProgress.push(userProgress)
+      questionProgress: []
+    };
+    
+    // Buscar el nombre real del usuario si existe
+    import('./auth').then(auth => {
+      const user = auth.getUser();
+      if (user && user.id === userId) {
+        newUserProgress.userName = user.name;
+        updateUserProgress(newUserProgress);
+      }
+    }).catch(err => console.error("Error obteniendo usuario:", err));
+    
+    // Agregar al array de usuarios
+    usersProgress.push(newUserProgress);
+    return newUserProgress;
   }
-
-  return userProgress
+  
+  return userProgress;
 }
 
 // Obtener progreso de todos los usuarios (para el leaderboard)
@@ -375,6 +435,9 @@ function saveQuestionProgressLocally(
 
   // Actualizar estadísticas del usuario
   updateUserStats(userId)
+  
+  // Guardar en localStorage
+  saveToLocalStorage()
 }
 
 // Actualizar estadísticas del usuario
@@ -413,5 +476,8 @@ function updateUserStats(userId: number): void {
   if (userIndex !== -1) {
     usersProgress[userIndex] = userProgress
   }
+  
+  // Guardar en localStorage
+  saveToLocalStorage()
 }
 

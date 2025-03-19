@@ -1,128 +1,166 @@
 "use client"
 
-import { redirect } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, useCallback } from "react"
 import { getUser } from "@/lib/auth"
 import { WeeksList } from "@/components/weeks-list"
-import { getWeeks, getUserProgress } from "@/lib/data"
+import { getWeeks } from "@/lib/data"
 import { fetchUserProgress } from "@/lib/api"
 import { UserProgress } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
-type DashboardClientProps = {}
-
 export function DashboardClient() {
+  const router = useRouter()
   const user = getUser()
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [hasLoaded, setHasLoaded] = useState(false)
   const { toast } = useToast()
 
   // Redirigir si no hay usuario autenticado
-  if (!user) {
-    redirect("/")
-  }
+  useEffect(() => {
+    if (!user) {
+      router.push("/")
+    }
+  }, [router, user])
 
-  // Cargar progreso del usuario
-  const loadUserProgress = async () => {
+  // Obtener la lista de semanas
+  const weeks = getWeeks()
+
+  // Cargar datos desde la API
+  const loadUserProgress = useCallback(async () => {
+    if (!user || hasLoaded && !isRefreshing) return;
+    
+    setIsRefreshing(true)
     try {
-      setLoading(true)
-      // Intentar cargar el progreso desde la API
       const progress = await fetchUserProgress(user.id)
       setUserProgress(progress)
+      setError(null)
     } catch (err) {
       console.error("Error al cargar el progreso del usuario:", err)
-      // Fallback a datos locales
-      const localProgress = getUserProgress(user.id)
-      setUserProgress(localProgress)
+      setError("No se pudieron cargar los datos. Por favor, intente de nuevo.")
     } finally {
       setLoading(false)
       setIsRefreshing(false)
+      setHasLoaded(true)
     }
-  }
+  }, [user, hasLoaded, isRefreshing])
 
-  // Actualizar manualmente el progreso
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    if (user && !hasLoaded) {
+      loadUserProgress()
+    }
+  }, [user, loadUserProgress, hasLoaded])
+
+  // Función para actualizar manualmente
   const handleRefresh = async () => {
     setIsRefreshing(true)
     try {
       await loadUserProgress()
       toast({
-        title: "Progreso actualizado",
-        description: "Tu progreso se ha actualizado correctamente.",
+        title: "Datos actualizados",
+        description: "El progreso se ha actualizado correctamente",
       })
     } catch (error) {
       toast({
         title: "Error",
-        description: "No se pudo actualizar el progreso.",
-        variant: "destructive",
+        description: "No se pudieron actualizar los datos",
+        variant: "destructive"
       })
+    } finally {
       setIsRefreshing(false)
     }
   }
 
-  // Cargar datos al montar el componente
-  useEffect(() => {
-    loadUserProgress()
-  }, [user.id])
-
-  // Obtener la lista de semanas
-  const weeks = getWeeks()
-  
   // Mostrar estado de carga
-  if (loading && !userProgress) {
-    return <div className="p-8 text-center">Cargando progreso...</div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin">
+          <RefreshCw className="h-8 w-8 text-primary" />
+        </div>
+      </div>
+    )
   }
 
-  // Si no hay progreso (algo salió mal), usar datos locales
-  const progress = userProgress || getUserProgress(user.id)
+  // Si hay un error, mostrar mensaje
+  if (error) {
+    return (
+      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+        <p className="text-yellow-700 dark:text-yellow-300">{error}</p>
+        <Button onClick={handleRefresh} variant="outline" className="mt-2">
+          Intentar de nuevo
+        </Button>
+      </div>
+    )
+  }
+
+  // Si no hay progreso, mostrar un mensaje
+  if (!userProgress) {
+    return (
+      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+        <p className="text-yellow-700 dark:text-yellow-300">
+          No se pudo cargar el progreso. Por favor, intente actualizar la página.
+        </p>
+        <Button onClick={handleRefresh} variant="outline" className="mt-2">
+          Intentar de nuevo
+        </Button>
+      </div>
+    )
+  }
 
   return (
-    <>
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Bienvenido, {user.name}</h1>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <h1 className="text-3xl font-bold">Panel de actividades</h1>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleRefresh}
           disabled={isRefreshing}
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Actualizando...' : 'Actualizar progreso'}
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          {isRefreshing ? "Actualizando..." : "Actualizar"}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <WeeksList weeks={weeks} userProgress={progress} />
+          <WeeksList weeks={weeks} userProgress={userProgress} />
         </div>
 
         <div>
-          <div className="bg-card rounded-lg shadow p-6 border border-border">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border p-6">
             <h2 className="text-xl font-semibold mb-4">Tu progreso</h2>
             <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Puntos totales</p>
-                <p className="text-2xl font-bold text-blue-600">{progress.totalPoints}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Preguntas completadas</p>
-                <p className="text-2xl font-bold text-blue-600">{progress.completedQuestions}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Semanas completadas</p>
-                <p className="text-2xl font-bold text-blue-600">{progress.completedWeeks}</p>
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                Semanas completadas: {progress.completedWeekIds.join(', ')}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Puntos totales</p>
+                  <p className="text-2xl font-bold text-blue-600">{userProgress.totalPoints}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Preguntas completadas</p>
+                  <p className="text-2xl font-bold text-blue-600">{userProgress.completedQuestions}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Semanas completadas</p>
+                  <p className="text-2xl font-bold text-blue-600">{userProgress.completedWeeks}</p>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Semanas completadas: {userProgress.completedWeekIds.join(', ')}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
