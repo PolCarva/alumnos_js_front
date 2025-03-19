@@ -7,28 +7,64 @@ import { saveQuestionProgress as apiSaveQuestionProgress } from "./api"
 const weeks: Week[] = [
   {
     id: 1,
-    title: "Introducción a JavaScript",
+    title: "Variables",
     description: "Fundamentos básicos del lenguaje JavaScript",
-    topics: ["Variables y tipos de datos", "Operadores", "Estructuras de control", "Funciones básicas"],
+    topics: ["variables", "constantes", "const", "let", "var"]
   },
   {
     id: 2,
-    title: "Estructuras de datos",
-    description: "Arrays, objetos y manipulación de datos",
-    topics: ["Arrays y métodos", "Objetos y propiedades", "Destructuring", "Spread y rest operators"],
+    title: "Condicionales",
+    description: "Estructuras de control en JavaScript",
+    topics: ["if", "else", "switch", "condiciones", "comparaciones"],
   },
   {
     id: 3,
-    title: "Funciones avanzadas",
-    description: "Conceptos avanzados de funciones en JavaScript",
-    topics: ["Arrow functions", "Closures", "Callbacks", "Funciones de orden superior"],
+    title: "Repetitivas",
+    description: "Estructuras de control en JavaScript",
+    topics: ["for", "while", "bucles", "iteraciones"],
   },
   {
     id: 4,
-    title: "Asincronía",
-    description: "Manejo de operaciones asíncronas en JavaScript",
-    topics: ["Callbacks asíncronos", "Promesas", "Async/await", "Fetch API"],
+    title: "Funciones",
+    description: "Conceptos básicos de funciones en JavaScript",
+    topics: ["function", "return", "parametros", "llamadas"],
   },
+  {
+    id: 5,
+    title: "Objetos nativos",
+    description: "Objetos nativos de JavaScript",
+    topics: ["Math", "Date", "Array", "String", "Object"],
+  },
+  {
+    id: 6,
+    title: "Arrays",
+    description: "Introducción a arrays en JavaScript",
+    topics: ["array", "push", "pop", "shift", "unshift"],
+  },
+  {
+    id: 7,
+    title: "Objetos",
+    description: "Introducción a objetos en JavaScript",
+    topics: ["object", "keys", "values", "entries"],
+  },
+  {
+    id: 8,
+    title: "Elementos del DOM",
+    description: "Introducción a elementos del DOM en JavaScript",
+    topics: ["document", "getElementById", "querySelector", "querySelectorAll"],
+  },
+  {
+    id: 9,
+    title: "Eventos",
+    description: "Introducción a eventos en JavaScript",
+    topics: ["addEventListener", "removeEventListener", "event", "target"],
+  },
+  {
+    id: 10,
+    title: "Fetch",
+    description: "Introducción a fetch en JavaScript",
+    topics: ["fetch", "then", "try", "catch", "async", "await"],
+  }
 ]
 
 // Datos de preguntas
@@ -40,7 +76,7 @@ const questions: Question[] = [
     type: "multiple-choice",
     title: "Variables en JavaScript",
     description:
-      "¿Cuál de las siguientes opciones es la forma correcta de declarar una variable constante en JavaScript?",
+      "¿Cuál de las siguientes opciones es la forma correcta de declarar una variable <b>constante</b> en JavaScript?",
     points: 1,
     options: ["var miVariable = 10;", "let miVariable = 10;", "const miVariable = 10;", "variable miVariable = 10;"],
     correctAnswer: "const miVariable = 10;",
@@ -49,165 +85,286 @@ const questions: Question[] = [
     id: 2,
     weekId: 1,
     type: "bug-fix",
-    title: "Corregir función",
-    description: "La siguiente función debería sumar dos números, pero tiene un error. Corrígelo.",
+    title: "Constantes en JavaScript",
+    description: "El siguiente código intenta incrementar el valor de una constante, pero tiene un error. Corrígelo.",
     points: 3,
-    buggyCode: "function sumar(a, b) {\n  return a - b;\n}",
-    correctCode: "function sumar(a, b) {\n  return a + b;\n}",
+    buggyCode: "const numero = 5;\nnumero = numero + 1;\nconsole.log(numero);",
+    correctCode: "let numero = 5;\nnumero = numero + 1;\nconsole.log(numero);",
   },
   {
     id: 3,
     weekId: 1,
-    type: "code-writing",
-    title: "Función factorial",
-    description: "Escribe una función que calcule el factorial de un número.",
+    type: "bug-fix",
+    title: "Multiplicar por sí mismo",
+    description: "Completa el siguiente código para que devuelva el resultado de multiplicar <code>numero</code> por sí mismo.",
     points: 5,
-    initialCode: "function factorial(n) {\n  // Tu código aquí\n}",
-    keywords: ["return", "factorial", "for", "while", "recursion", "recursiva", "if"],
-    testCases: [
-      { input: "factorial(0)", expectedOutput: "1" },
-      { input: "factorial(1)", expectedOutput: "1" },
-      { input: "factorial(5)", expectedOutput: "120" },
-      { input: "factorial(10)", expectedOutput: "3628800" },
-    ],
+    buggyCode: "let numero = 5;\nnumero = numero * 2;\nconsole.log(numero);",
+    correctCode: "let numero = 5;\nnumero = numero * numero;\nconsole.log(numero);",
   },
 
-  // Semana 2: Estructuras de datos
+  // Semana 2: Operadores y condicionales
   {
     id: 4,
     weekId: 2,
     type: "multiple-choice",
-    title: "Métodos de arrays",
+    title: "Operadores de comparación",
     description:
-      "¿Qué método de array se utiliza para crear un nuevo array con los elementos que cumplan una condición?",
-    points: 1,
-    options: ["array.map()", "array.filter()", "array.reduce()", "array.forEach()"],
-    correctAnswer: "array.filter()",
+      "¿Cuál de los siguientes operadores se utiliza para comprobar si dos valores son <b>iguales</b> en <b>valor y tipo</b>?",
+    points: 5,
+    options: ["==", "===", "!=", "!=="],
+    correctAnswer: "===",
   },
   {
     id: 5,
     weekId: 2,
     type: "bug-fix",
-    title: "Corregir destructuring",
+    title: "Corregir condicional if-else",
     description:
-      "El siguiente código intenta extraer propiedades de un objeto usando destructuring, pero tiene un error. Corrígelo.",
+      "El siguiente código debería mostrar 'Mayor de edad' si la edad <b>es igual a 18 o mayor</b>, y 'Menor de edad' en caso contrario. Corrige el error.",
     points: 3,
     buggyCode:
-      "const persona = { nombre: 'Juan', edad: 25 };\nconst { nombre, apellido } = persona;\nconsole.log(nombre, apellido);",
+      "const edad = 18;\nif (edad < 18) {\n  console.log('Mayor de edad');\n} else {\n  console.log('Menor de edad');\n}",
     correctCode:
-      "const persona = { nombre: 'Juan', edad: 25 };\nconst { nombre, edad } = persona;\nconsole.log(nombre, edad);",
+      "const edad = 18;\nif (edad >= 18) {\n  console.log('Mayor de edad');\n} else {\n  console.log('Menor de edad');\n}",
   },
   {
     id: 6,
     weekId: 2,
     type: "code-writing",
-    title: "Filtrar y transformar array",
+    title: "Evaluación de calificaciones",
     description:
-      "Escribe una función que reciba un array de números, filtre los números pares y devuelva un nuevo array con el cuadrado de esos números.",
-    points: 5,
-    initialCode: "function filtrarYTransformar(numeros) {\n  // Tu código aquí\n}",
-    keywords: ["filter", "map", "=>", "return", "numeros", "array", "pares", "cuadrado"],
+      "Escribe una función que reciba una calificación numérica y devuelva: <b>'Sobresaliente' si es 90 o más</b>, <b>'No sobresaliente' en caso contrario</b>.",
+    points: 1,
+    initialCode: "function evaluarCalificacion(nota) {\n  // Tu código aquí\n}",
+    keywords: ["if", "else", "return", "nota", "calificación", "condición", ">="],
     testCases: [
-      { input: "filtrarYTransformar([1, 2, 3, 4, 5])", expectedOutput: "[4, 16]" },
-      { input: "filtrarYTransformar([2, 4, 6])", expectedOutput: "[4, 16, 36]" },
-      { input: "filtrarYTransformar([1, 3, 5])", expectedOutput: "[]" },
+      { input: "evaluarCalificacion(95)", expectedOutput: "'Sobresaliente'" },
+      { input: "evaluarCalificacion(75)", expectedOutput: "'No sobresaliente'" },
+      { input: "evaluarCalificacion(90)", expectedOutput: "'Sobresaliente'" },
+      { input: "evaluarCalificacion(89)", expectedOutput: "'No sobresaliente'" },
     ],
   },
 
-  // Semana 3: Funciones avanzadas
+  // Semana 3: Repetitivas
   {
     id: 7,
     weekId: 3,
     type: "multiple-choice",
-    title: "Arrow functions",
-    description: "¿Cuál es la característica principal de las arrow functions en JavaScript?",
+    title: "Condicionales básicos",
+    description: "¿Qué estructura se utiliza en JavaScript para tomar decisiones basadas en una condición?",
     points: 1,
     options: [
-      "No tienen su propio this",
-      "No pueden tener parámetros",
-      "Siempre deben tener llaves {}",
-      "No pueden ser anónimas",
+      "if-else",
+      "for",
+      "while",
+      "switch-case"
     ],
-    correctAnswer: "No tienen su propio this",
+    correctAnswer: "if-else",
   },
   {
     id: 8,
     weekId: 3,
     type: "bug-fix",
-    title: "Corregir closure",
-    description: "El siguiente código intenta crear un contador usando closures, pero tiene un error. Corrígelo.",
+    title: "Corregir bucle for",
+    description: "El siguiente código debería mostrar los números del 1 al 5 usando un bucle for, pero tiene un error. Corrígelo.",
     points: 3,
     buggyCode:
-      "function crearContador() {\n  let contador = 0;\n  return {\n    incrementar: function() { contador++; },\n    obtenerValor: function() { return contador; }\n  };\n}\nconst miContador = crearContador();\nmiContador.incrementar();\nconsole.log(contador);",
+      "// Mostrar números del 1 al 5\nfor (let i = 1; i > 5; i++) {\n  console.log(i);\n}",
     correctCode:
-      "function crearContador() {\n  let contador = 0;\n  return {\n    incrementar: function() { contador++; },\n    obtenerValor: function() { return contador; }\n  };\n}\nconst miContador = crearContador();\nmiContador.incrementar();\nconsole.log(miContador.obtenerValor());",
+      "// Mostrar números del 1 al 5\nfor (let i = 1; i <= 5; i++) {\n  console.log(i);\n}",
   },
   {
     id: 9,
     weekId: 3,
     type: "code-writing",
-    title: "Función de orden superior",
+    title: "Sumar números pares",
     description:
-      "Escribe una función 'ejecutarNVeces' que reciba una función y un número, y ejecute la función ese número de veces.",
+      "Escribe una función que sume todos los números pares desde 1 hasta n (inclusive). Utiliza un bucle para resolver este problema.",
     points: 5,
-    initialCode: "function ejecutarNVeces(fn, n) {\n  // Tu código aquí\n}",
-    keywords: ["for", "while", "loop", "bucle", "fn", "function", "función", "call", "llamar", "ejecutar"],
+    initialCode: "function sumarPares(n) {\n  // Tu código aquí\n}",
+    keywords: ["for", "while", "loop", "bucle", "suma", "pares", "if", "return"],
     testCases: [
       {
-        input: "let contador = 0; ejecutarNVeces(() => contador++, 3); contador",
-        expectedOutput: "3",
+        input: "sumarPares(10)",
+        expectedOutput: "30",
       },
       {
-        input: "let resultado = ''; ejecutarNVeces(() => { resultado += 'a' }, 5); resultado",
-        expectedOutput: "'aaaaa'",
+        input: "sumarPares(20)",
+        expectedOutput: "110",
       },
+      {
+        input: "sumarPares(1)",
+        expectedOutput: "0",
+      },
+      {
+        input: "sumarPares(2)",
+        expectedOutput: "2",
+      }
     ],
   },
 
-  // Semana 4: Asincronía
+  // Semana 4: Funciones
   {
     id: 10,
     weekId: 4,
     type: "multiple-choice",
-    title: "Promesas en JavaScript",
-    description: "¿Cuál de los siguientes métodos se utiliza para manejar errores en promesas?",
+    title: "Conceptos básicos de funciones",
+    description: "¿Cuál de las siguientes opciones es la forma correcta de declarar una función en JavaScript?",
     points: 1,
-    options: [".then()", ".catch()", ".finally()", ".error()"],
-    correctAnswer: ".catch()",
+    options: [
+      "function miFuncion() { return true; }",
+      "const miFuncion = function() { return true; }",
+      "miFuncion() { return true; }",
+      "let function miFuncion() { return true; }"
+    ],
+    correctAnswer: "function miFuncion() { return true; }",
   },
   {
     id: 11,
     weekId: 4,
     type: "bug-fix",
-    title: "Corregir async/await",
-    description: "El siguiente código usa async/await para obtener datos, pero tiene un error. Corrígelo.",
+    title: "Corregir declaración de función",
+    description: "La siguiente función tiene un error en cómo se define la operación para calcular el área de un rectángulo. Corrige la definición de la función.",
     points: 3,
     buggyCode:
-      "async function obtenerDatos() {\n  const respuesta = fetch('https://api.ejemplo.com/datos');\n  const datos = await respuesta.json();\n  return datos;\n}",
+      "function calcularArea(base; altura) {\n  let area = base * altura;\n  return area;\n}",
     correctCode:
-      "async function obtenerDatos() {\n  const respuesta = await fetch('https://api.ejemplo.com/datos');\n  const datos = await respuesta.json();\n  return datos;\n}",
+      "function calcularArea(base, altura) {\n  let area = base * altura;\n  return area;\n}",
   },
   {
     id: 12,
     weekId: 4,
     type: "code-writing",
-    title: "Promisificar función",
-    description: "Convierte la siguiente función basada en callbacks a una que use promesas.",
+    title: "Función factorial",
+    description:
+      "Escribe una función que calcule el factorial de un número n. El factorial de n es el producto de todos los enteros positivos desde 1 hasta n.",
     points: 5,
-    initialCode:
-      "function leerArchivo(ruta, callback) {\n  // Simulación de lectura de archivo\n  setTimeout(() => {\n    if (ruta) {\n      callback(null, 'Contenido del archivo');\n    } else {\n      callback(new Error('Ruta no válida'));\n    }\n  }, 1000);\n}\n\n// Conviértela a una función que devuelva una promesa\nfunction leerArchivoPromise(ruta) {\n  // Tu código aquí\n}",
-    keywords: ["Promise", "new Promise", "resolve", "reject", "then", "catch", "return"],
+    initialCode: "function factorial(n) {\n  // Tu código aquí\n}",
+    keywords: ["for", "while", "recursion", "recursiva", "multiplicación", "return"],
     testCases: [
       {
-        input: "typeof leerArchivoPromise('archivo.txt').then",
-        expectedOutput: "'function'",
+        input: "factorial(5)",
+        expectedOutput: "120",
       },
       {
-        input: "leerArchivoPromise('').catch(err => 'Error capturado').then(result => typeof result === 'string')",
-        expectedOutput: "true",
+        input: "factorial(0)",
+        expectedOutput: "1",
       },
+      {
+        input: "factorial(1)",
+        expectedOutput: "1",
+      },
+      {
+        input: "factorial(10)",
+        expectedOutput: "3628800",
+      }
     ],
   },
+  // Semana 5: Objetos nativos
+  {
+    id: 13,
+    weekId: 5,
+    type: "multiple-choice",
+    title: "Método Math.random()",
+    description: "¿Qué rango de valores puede devolver el método Math.random()?",
+    points: 1,
+    options: [
+      "Entre 0 y 1, incluyendo el 0 pero no el 1",
+      "Entre 0 y 1, incluyendo ambos valores",
+      "Entre -1 y 1, incluyendo ambos valores",
+      "Entre 0 y 100, incluyendo ambos valores"
+    ],
+    correctAnswer: "Entre 0 y 1, incluyendo el 0 pero no el 1",
+  },
+  {
+    id: 14,
+    weekId: 5,
+    type: "bug-fix",
+    title: "Número aleatorio entero",
+    description: "El siguiente código intenta generar un número aleatorio entero entre 1 y 10, pero tiene un error. Corrígelo.",
+    points: 3,
+    buggyCode: "function numeroAleatorio() {\n  return Math.random() * 10;\n}",
+    correctCode: "function numeroAleatorio() {\n  return Math.floor(Math.random() * 10) + 1;\n}",
+  },
+  {
+    id: 15,
+    weekId: 5,
+    type: "code-writing",
+    title: "Redondeo a decena superior",
+    description: "Escribe una función que redondee un número a la decena superior más cercana.",
+    points: 5,
+    initialCode: "function redondearDecena(numero) {\n  // Tu código aquí\n}",
+    keywords: ["Math.ceil", "Math.round", "Math.floor", "decena", "return"],
+    testCases: [
+      {
+        input: "redondearDecena(12)",
+        expectedOutput: "20",
+      },
+      {
+        input: "redondearDecena(10)",
+        expectedOutput: "10",
+      },
+      {
+        input: "redondearDecena(35)",
+        expectedOutput: "40",
+      },
+      {
+        input: "redondearDecena(99)",
+        expectedOutput: "100",
+      }
+    ],
+  },
+  // Semana 6: Arrays
+  {
+    id: 16,
+    weekId: 6,
+    type: "multiple-choice",
+    title: "Método push en Arrays",
+    description: "¿Qué hace el método push() en un array de JavaScript?",
+    points: 1,
+    options: [
+      "Elimina el último elemento del array",
+      "Añade un elemento al final del array",
+      "Añade un elemento al principio del array",
+      "Elimina el primer elemento del array"
+    ],
+    correctAnswer: "Añade un elemento al final del array",
+  },
+  {
+    id: 17,
+    weekId: 6,
+    type: "bug-fix",
+    title: "Eliminar el último elemento",
+    description: "El siguiente código intenta eliminar el último elemento de un array y devolverlo, pero tiene un error. Corrígelo.",
+    points: 3,
+    buggyCode: "function eliminarUltimo(array) {\n  return array.push();\n}",
+    correctCode: "function eliminarUltimo(array) {\n  return array.pop();\n}",
+  },
+  {
+    id: 18,
+    weekId: 6,
+    type: "code-writing",
+    title: "Acceso por índice",
+    description: "Escribe una función que devuelva el elemento central de un array. Si el array tiene un número par de elementos, devuelve el elemento en la posición (longitud/2)-1.",
+    points: 5,
+    initialCode: "function elementoCentral(array) {\n  // Tu código aquí\n}",
+    keywords: ["length", "index", "array", "return", "Math.floor"],
+    testCases: [
+      {
+        input: "elementoCentral([1, 2, 3])",
+        expectedOutput: "2",
+      },
+      {
+        input: "elementoCentral([1, 2, 3, 4])",
+        expectedOutput: "2",
+      },
+      {
+        input: "elementoCentral(['a', 'b', 'c', 'd', 'e'])",
+        expectedOutput: "'c'",
+      }
+    ],
+  },
+
 ]
 
 // Datos de progreso de usuarios (inicialmente vacío)

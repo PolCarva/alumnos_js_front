@@ -67,3 +67,10 @@
   overflow: auto;
 }
 
+code {
+  font-family: "Fira Code", monospace;
+  background-color: #1e1e1e;
+  color: #f9d71c;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.2rem;
+}

@@ -217,6 +217,8 @@ export function CodeWritingQuestion({
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
         <p className="text-blue-700 dark:text-blue-300 text-sm">
           Escribe el código que resuelva el problema planteado.
+          <br />
+          <b>Pista:</b> para que tu solución funcione correctamente, asegúrate de utilizar la palabra clave <span className="font-mono p-1 bg-blue-100 dark:bg-blue-900/30 rounded-md">return</span> para devolver el resultado esperado.
         </p>
       </div>
       

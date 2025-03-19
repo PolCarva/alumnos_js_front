@@ -437,7 +437,7 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
         
         <CardContent>
           <div className="mb-4">
-            <p className="mb-4">{currentQuestion.description}</p>
+            <p className="mb-4" dangerouslySetInnerHTML={{ __html: currentQuestion.description }} />
           </div>
           
           {renderQuestionComponent()}
