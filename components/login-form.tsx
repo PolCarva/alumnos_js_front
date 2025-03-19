@@ -53,7 +53,12 @@ export function LoginForm() {
     <Card>
       <CardHeader>
         <CardTitle>Iniciar sesión</CardTitle>
-        <CardDescription>Ingresa tus credenciales para acceder a la plataforma</CardDescription>
+        <CardDescription>Ingresa tus credenciales para acceder a la plataforma
+          <br></br>
+          <b>Usuario: Nro de alumno</b>
+          <br></br>
+          <b>Contraseña: Cédula (sin puntos ni guiones)</b>
+        </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -84,6 +89,7 @@ export function LoginForm() {
             {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
         </CardFooter>
+        <p className="text-sm text-gray-500 text-center pb-5"><b>Usuario:</b> demo | <b>Contraseña:</b> 53397082</p>
       </form>
     </Card>
   )

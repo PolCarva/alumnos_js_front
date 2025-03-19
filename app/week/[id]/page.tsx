@@ -7,8 +7,9 @@ interface WeekPageProps {
   }
 }
 
-export default function WeekPage({ params }: WeekPageProps) {
-  const weekId = Number.parseInt(params.id)
+export default async function WeekPage({ params }: WeekPageProps) {
+  const parameters = await params
+  const weekId = Number.parseInt(parameters.id)
 
   return (
     <div className="min-h-screen bg-background">

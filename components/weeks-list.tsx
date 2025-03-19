@@ -23,6 +23,9 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
   }
 
   const isWeekUnlocked = (weekId: number) => {
+    // El usuario demo siempre tiene todas las semanas desbloqueadas
+    if (userProgress.userId === 1) return true
+    
     // La primera semana siempre está desbloqueada
     if (weekId === 1) return true
 

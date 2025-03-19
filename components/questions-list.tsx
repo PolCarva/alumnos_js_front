@@ -26,6 +26,12 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [localUserProgress, setLocalUserProgress] = useState<UserProgress>(userProgress)
   const [showingAnswerFeedback, setShowingAnswerFeedback] = useState(false)
+  const [demoAnswerResults, setDemoAnswerResults] = useState<Record<number, { 
+    completed: boolean, 
+    failed: boolean, 
+    points: number, 
+    userAnswer?: string 
+  }>>({})
   const [questionStatuses, setQuestionStatuses] = useState<Array<{
     id: number;
     title: string;
@@ -66,28 +72,70 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
 
   // Verificar si la pregunta ya fue completada o fallada
   useEffect(() => {
+    // Para el usuario demo, usar el estado persistente
+    if (userId === 1 && demoAnswerResults[currentQuestion?.id]) {
+      const demoResult = demoAnswerResults[currentQuestion.id];
+      const demoProgress: QuestionProgress = {
+        userId,
+        weekId,
+        questionId: currentQuestion.id,
+        completed: demoResult.completed,
+        failed: demoResult.failed,
+        points: demoResult.points,
+        userAnswer: demoResult.userAnswer
+      };
+      setQuestionProgress(demoProgress);
+      setShowingAnswerFeedback(true);
+      return;
+    }
+    
+    // Para usuarios normales, comportamiento estándar
     const progress = localUserProgress.questionProgress.find(
       (q) => q.questionId === currentQuestion?.id
-    )
-    setQuestionProgress(progress || null)
-  }, [localUserProgress, currentQuestion])
+    );
+    setQuestionProgress(progress || null);
+  }, [localUserProgress, currentQuestion, userId, demoAnswerResults, weekId]);
 
   // Asegurar que los componentes de preguntas se reinicien cuando cambia el índice de pregunta
   // para evitar que la respuesta anterior se mantenga en la nueva pregunta
   useEffect(() => {
     // Limpiar la retroalimentación solo cuando el usuario cambie de pregunta explícitamente
-    setShowingAnswerFeedback(false);
+    if (userId !== 1) {
+      setShowingAnswerFeedback(false);
+    } else if (demoAnswerResults[questions[currentQuestionIndex]?.id]) {
+      // Para el usuario demo, mostrar feedback si ya respondió esta pregunta
+      setShowingAnswerFeedback(true);
+    } else {
+      setShowingAnswerFeedback(false);
+    }
     
     // Buscar el progreso de la nueva pregunta seleccionada
-    const progress = localUserProgress.questionProgress.find(
-      (q) => q.questionId === questions[currentQuestionIndex]?.id
+    if (userId === 1 && demoAnswerResults[questions[currentQuestionIndex]?.id]) {
+      // Para el usuario demo, usar el estado persistente
+      const demoResult = demoAnswerResults[questions[currentQuestionIndex].id];
+      const demoProgress: QuestionProgress = {
+        userId,
+        weekId,
+        questionId: questions[currentQuestionIndex].id,
+        completed: demoResult.completed,
+        failed: demoResult.failed,
+        points: demoResult.points,
+        userAnswer: demoResult.userAnswer
+      };
+      setQuestionProgress(demoProgress);
+    } else {
+      // Para usuarios normales, comportamiento estándar
+      const progress = localUserProgress.questionProgress.find(
+        (q) => q.questionId === questions[currentQuestionIndex]?.id
+      );
+      setQuestionProgress(progress || null);
+    }
+    
+    console.log(`Cambiando a pregunta #${currentQuestionIndex + 1}, progreso:`, 
+      userId === 1 ? demoAnswerResults[questions[currentQuestionIndex]?.id] : 
+      localUserProgress.questionProgress.find(q => q.questionId === questions[currentQuestionIndex]?.id)
     );
-    
-    // Actualizar el progreso actual
-    setQuestionProgress(progress || null);
-    
-    console.log(`Cambiando a pregunta #${currentQuestionIndex + 1}, progreso:`, progress);
-  }, [currentQuestionIndex, localUserProgress.questionProgress, questions]);
+  }, [currentQuestionIndex, localUserProgress.questionProgress, questions, userId, demoAnswerResults, weekId]);
 
   const isQuestionCompleted = questionProgress?.completed || false
   const isQuestionFailed = questionProgress?.failed || false
@@ -111,6 +159,72 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
         failed: !result.correct,
         points: result.correct ? currentQuestion.points : 0,
         userAnswer: typeof answer === 'string' ? answer : answer.join(',')
+      }
+      
+      // Para el usuario demo, guardar en el estado persistente
+      if (userId === 1) {
+        console.log(`Demo user answered question ${currentQuestion.id}, result: ${result.correct ? 'correct' : 'incorrect'}`);
+        
+        setDemoAnswerResults(prev => ({
+          ...prev,
+          [currentQuestion.id]: {
+            completed: result.correct,
+            failed: !result.correct,
+            points: result.correct ? currentQuestion.points : 0,
+            userAnswer: typeof answer === 'string' ? answer : answer.join(',')
+          }
+        }));
+        
+        // Para el usuario demo, no necesitamos llamar al servidor, solo actualizamos la UI local
+        const updatedProgress = {...localUserProgress}
+        const existingIndex = updatedProgress.questionProgress.findIndex(
+          q => q.questionId === currentQuestion.id && q.weekId === weekId
+        )
+        
+        if (existingIndex >= 0) {
+          updatedProgress.questionProgress[existingIndex] = userProgressData
+        } else {
+          updatedProgress.questionProgress.push(userProgressData)
+        }
+        
+        // Actualizar contadores
+        const completedQuestions = updatedProgress.questionProgress.filter(q => q.completed).length
+        const totalPoints = updatedProgress.questionProgress.reduce((sum, q) => sum + q.points, 0)
+        
+        updatedProgress.completedQuestions = completedQuestions
+        updatedProgress.totalPoints = totalPoints
+        
+        // Actualizar el estado local
+        setLocalUserProgress(updatedProgress)
+        setQuestionProgress(userProgressData)
+        
+        // Actualizar el estado local de la pregunta en la lista
+        const newStatuses = [...questionStatuses]
+        const statusIndex = newStatuses.findIndex(s => s.id === currentQuestion.id)
+        if (statusIndex >= 0) {
+          newStatuses[statusIndex] = {
+            ...newStatuses[statusIndex],
+            completed: result.correct,
+            failed: !result.correct,
+            points: result.correct ? currentQuestion.points : 0
+          }
+          setQuestionStatuses(newStatuses)
+        }
+        
+        // Desactivar estado de envío pero mantener feedback visible
+        setIsSubmitting(false)
+        
+        // Mostrar toast con el resultado
+        toast({
+          title: result.correct ? "¡Respuesta correcta!" : "Respuesta incorrecta",
+          description: result.correct 
+            ? `Has ganado ${userProgressData.points} puntos. Como usuario demo, puedes volver a responder o seguir a la siguiente pregunta.` 
+            : "La respuesta es incorrecta. Puedes ver la solución correcta y reintentar cuando quieras.",
+          variant: result.correct ? "default" : "destructive",
+          duration: 5000, // 5 segundos
+        })
+        
+        return; // Terminamos aquí para el usuario demo, no llamamos al servidor
       }
       
       // Guardar progreso en el servidor y esperar a que se complete
@@ -185,9 +299,9 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
         title: result.correct ? "¡Respuesta correcta!" : "Respuesta incorrecta",
         description: result.correct 
           ? `Has ganado ${userProgressData.points} puntos. Pulsa "Siguiente" para continuar.` 
-          : "Puedes ver la solución y pulsar 'Siguiente' cuando quieras pasar a la siguiente pregunta.",
+          : "La respuesta es incorrecta. Aun así, la pregunta se considera intentada y cuenta para desbloquear la siguiente semana. Puedes consultar la solución correcta arriba y pulsar 'Siguiente' para continuar.",
         variant: result.correct ? "default" : "destructive",
-        duration: 4000, // 4 segundos
+        duration: 5000, // 5 segundos
       })
     } catch (error) {
       console.error("Error al verificar la respuesta:", error)
@@ -296,7 +410,12 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
 
   const renderQuestionComponent = () => {
     // Usamos una clave única para cada pregunta para forzar recreación del componente
-    const questionKey = `question-${currentQuestion.id}-${currentQuestionIndex}`;
+    // Para el usuario demo, añadimos un timestamp para forzar re-renderización cuando reinicie
+    const isDemoUser = userId === 1;
+    const isAnswered = demoAnswerResults[currentQuestion.id] !== undefined;
+    const questionKey = isDemoUser 
+      ? `question-${currentQuestion.id}-${currentQuestionIndex}-${isAnswered ? 'answered' : 'unanswered'}-${Date.now()}`
+      : `question-${currentQuestion.id}-${currentQuestionIndex}`;
     
     switch (currentQuestion.type) {
       case "multiple-choice":
@@ -392,6 +511,19 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
 
   return (
     <div>
+      {/* Banner informativo para usuario demo */}
+      {userId === 1 && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-blue-700 dark:text-blue-300 font-medium">
+            Modo de prueba (Usuario Demo) 🔍
+          </p>
+          <p className="text-blue-600 dark:text-blue-400 text-sm mt-1">
+            Puedes acceder a todas las semanas y responder preguntas ilimitadamente. 
+            Las respuestas no afectan a tu progreso ni se guardan permanentemente.
+          </p>
+        </div>
+      )}
+      
       {/* Navegación de preguntas */}
       <div className="mb-6 flex flex-wrap gap-2">
         {questionStatuses.map((q, index) => (
@@ -458,10 +590,91 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
                 "text-green-600 dark:text-green-400" : 
                 "text-red-600 dark:text-red-400"}`}>
                 {questionProgress.completed ? 
-                  `Has ganado ${questionProgress.points} puntos. Pulsa "Siguiente" para continuar.` : 
-                  "La respuesta es incorrecta. Puedes consultar la solución correcta arriba y pulsar 'Siguiente' cuando estés listo."}
+                  `Has ganado ${questionProgress.points} puntos. ${userId === 1 ? "Como usuario demo, puedes volver a responder o seguir a la siguiente pregunta." : "Pulsa \"Siguiente\" para continuar."}` : 
+                  userId === 1 ? 
+                    "La respuesta es incorrecta. Puedes ver la solución correcta y reintentar cuando quieras." :
+                    "La respuesta es incorrecta. Aun así, la pregunta se considera intentada y cuenta para desbloquear la siguiente semana. Puedes consultar la solución correcta arriba y pulsar 'Siguiente' para continuar."}
               </p>
               <div className="mt-3 text-right">
+                {userId === 1 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="mr-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    onClick={() => {
+                      // Reiniciar estado para permitir un nuevo intento
+                      setShowingAnswerFeedback(false);
+                      setQuestionProgress(null);
+                      
+                      // Eliminar la respuesta del estado persistente
+                      setDemoAnswerResults(prev => {
+                        const newResults = {...prev};
+                        delete newResults[currentQuestion.id];
+                        return newResults;
+                      });
+                      
+                      // Actualizar lista de estatus para mostrar que la pregunta está sin responder
+                      const newStatuses = [...questionStatuses];
+                      const statusIndex = newStatuses.findIndex(s => s.id === currentQuestion.id);
+                      if (statusIndex >= 0) {
+                        newStatuses[statusIndex] = {
+                          ...newStatuses[statusIndex],
+                          completed: false,
+                          failed: false
+                        };
+                        setQuestionStatuses(newStatuses);
+                      }
+                      
+                      // También actualizar el progreso local para consistencia en la UI
+                      const updatedProgress = {...localUserProgress};
+                      const existingIndex = updatedProgress.questionProgress.findIndex(
+                        q => q.questionId === currentQuestion.id && q.weekId === weekId
+                      );
+                      
+                      if (existingIndex >= 0) {
+                        // Remover la entrada de este progreso
+                        updatedProgress.questionProgress.splice(existingIndex, 1);
+                        setLocalUserProgress(updatedProgress);
+                      }
+                      
+                      // Forzar re-renderizado del componente de pregunta
+                      // Esto es importante para formularios y editores de código
+                      const currentComponent = currentQuestion.type;
+                      if (currentComponent === "bug-fix" || currentComponent === "code-writing") {
+                        // Usar un setTimeout para asegurar que el estado se actualice primero
+                        setTimeout(() => {
+                          // Esto forzará que el componente de pregunta se reconstruya
+                          setCurrentQuestionIndex(prevIndex => {
+                            // Mismo índice, pero fuerza re-renderizado
+                            return prevIndex;
+                          });
+                        }, 50);
+                      }
+                      
+                      // Mostrar indicador visual de reinicio
+                      toast({
+                        title: "Pregunta reiniciada",
+                        description: "Ahora puedes responder nuevamente a esta pregunta.",
+                        variant: "default",
+                        duration: 3000,
+                      });
+                      
+                      // Mostrar mensaje adicional para preguntas de código
+                      if (currentQuestion.type === "bug-fix" || currentQuestion.type === "code-writing") {
+                        setTimeout(() => {
+                          toast({
+                            title: "Reseteo de editor",
+                            description: "El editor de código se ha reiniciado. Puedes empezar de nuevo.",
+                            variant: "default",
+                            duration: 3000,
+                          });
+                        }, 500);
+                      }
+                    }}
+                  >
+                    Reintentar pregunta
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm" 

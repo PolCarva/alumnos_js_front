@@ -6,13 +6,12 @@ import { getUser } from "@/lib/auth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { TrophyIcon, MedalIcon, AwardIcon, RefreshCw } from "lucide-react"
+import { TrophyIcon, MedalIcon, AwardIcon, RefreshCw, ChevronDown, ChevronUp } from "lucide-react"
 import type { UserProgress } from "@/lib/types"
 import { fetchLeaderboard } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 
-type LeaderboardClientProps = {}
 
 export function LeaderboardClient() {
   const user = getUser()
@@ -21,6 +20,7 @@ export function LeaderboardClient() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [showAll, setShowAll] = useState(false)
   const { toast } = useToast()
 
   // Redirigir si no hay usuario autenticado
@@ -78,7 +78,7 @@ export function LeaderboardClient() {
   }
 
   // Ordenar por puntos (de mayor a menor)
-  const sortedUsers = [...usersProgress].sort((a, b) => b.totalPoints - a.totalPoints)
+  const sortedUsers = [...usersProgress].filter(user => user.userId !== 1).sort((a, b) => b.totalPoints - a.totalPoints)
 
   // Encontrar la posición del usuario actual
   const currentUserRank = sortedUsers.findIndex((u) => u.userId === user.id) + 1
@@ -103,7 +103,7 @@ export function LeaderboardClient() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row gap-2 justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Leaderboard</h1>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-500">
@@ -167,8 +167,20 @@ export function LeaderboardClient() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle>Clasificación completa</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowAll(!showAll)}
+            className="flex items-center gap-1"
+          >
+            {showAll ? (
+              <>Mostrar menos <ChevronUp className="h-4 w-4" /></>
+            ) : (
+              <>Mostrar todos <ChevronDown className="h-4 w-4" /></>
+            )}
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -182,7 +194,7 @@ export function LeaderboardClient() {
                 </tr>
               </thead>
               <tbody>
-                {sortedUsers.map((userProgress, index) => (
+                {(showAll ? sortedUsers : sortedUsers.slice(0, 10)).map((userProgress, index) => (
                   <tr
                     key={userProgress.userId}
                     className={`border-b ${userProgress.userId === user.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
@@ -233,4 +245,3 @@ export function LeaderboardClient() {
     </div>
   )
 }
-

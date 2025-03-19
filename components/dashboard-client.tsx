@@ -116,7 +116,20 @@ export function DashboardClient() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      {/* Banner para usuario demo */}
+      {user?.id === 1 && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-blue-700 dark:text-blue-300 font-medium">
+            ¡Bienvenido al modo de prueba! 🚀
+          </p>
+          <p className="text-blue-600 dark:text-blue-400 text-sm mt-1">
+            Como usuario demo, tienes acceso a todas las semanas sin restricciones. Puedes responder cualquier pregunta 
+            múltiples veces y explorar toda la plataforma libremente. Tu progreso no se guarda permanentemente.
+          </p>
+        </div>
+      )}
+      
+      <div className="flex flex-col md:flex-row gap-2 justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Panel de actividades</h1>
         <Button
           variant="outline"
@@ -152,9 +165,10 @@ export function DashboardClient() {
                   <p className="text-sm text-gray-500">Semanas completadas</p>
                   <p className="text-2xl font-bold text-blue-600">{userProgress.completedWeeks}</p>
                 </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  Semanas completadas: {userProgress.completedWeekIds.join(', ')}
-                </div>
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                <p>Semanas completadas: {userProgress.completedWeekIds.join(', ')}</p>
+                <p className="mt-1 italic">Nota: Una semana se considera completada cuando has respondido todas sus preguntas, sin importar si las respuestas fueron correctas o incorrectas.</p>
               </div>
             </div>
           </div>

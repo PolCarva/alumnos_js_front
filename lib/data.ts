@@ -364,6 +364,174 @@ const questions: Question[] = [
       }
     ],
   },
+  // Semana 7: Objetos
+  {
+    id: 19,
+    weekId: 7,
+    type: "multiple-choice",
+    title: "Método Object.keys()",
+    description: "¿Qué hace el método Object.keys() en un objeto de JavaScript?",
+    points: 1,
+    options: [
+      "Devuelve un array con las propiedades enumerables del objeto",
+      "Devuelve un array con las propiedades no enumerables del objeto",
+      "Devuelve un array con las propiedades del objeto",
+      "Devuelve un objeto con las propiedades del objeto"
+    ],
+    correctAnswer: "Devuelve un array con las propiedades enumerables del objeto",
+  },
+  {
+    id: 20,
+    weekId: 7,
+    type: "bug-fix",
+    title: "Acceso a propiedades de un auto",
+    description: "El siguiente código intenta acceder a las propiedades de un objeto auto, pero tiene un error. Corrígelo.",
+    points: 3,
+    buggyCode: "const auto = {marca: 'Toyota', modelo: 'Corolla', año: 2022};\nconsole.log(marca);",
+    correctCode: "const auto = {marca: 'Toyota', modelo: 'Corolla', año: 2022};\nconsole.log(auto.marca);",
+  },
+  {
+    id: 21,
+    weekId: 7,
+    type: "code-writing",
+    title: "Método Object.values()",
+    description: "Escribe una función que devuelva un array con los valores de las propiedades enumerables de un objeto.",
+    points: 5,
+    initialCode: "function obtenerValores(objeto) {\n  // Tu código aquí\n}",
+    keywords: ["Object.values", "values", "for", "in"],
+    testCases: [
+      {
+        input: "obtenerValores({a: 1, b: 2, c: 3})",
+        expectedOutput: "[1, 2, 3]",
+      },
+      {
+        input: "obtenerValores({nombre: 'Juan', edad: 25})",
+        expectedOutput: "['Juan', 25]",
+      },
+      {
+        input: "obtenerValores({})",
+        expectedOutput: "[]",
+      }
+    ],
+  },
+  // Semana 8: Elementos del DOM
+  {
+    id: 22,
+    weekId: 8,
+    type: "multiple-choice",
+    title: "Método querySelector()",
+    description: "¿Qué hace el método <b>querySelector()</b> en el DOM de JavaScript?",
+    points: 1,
+    options: [
+      "Devuelve todos los elementos que coinciden con el selector",
+      "Devuelve el último elemento que coincide con el selector",
+      "Devuelve un array con todos los elementos que coinciden con el selector",
+      "Devuelve el primer elemento que coincide con el selector"
+    ],
+    correctAnswer: "Devuelve el primer elemento que coincide con el selector",
+  },
+  {
+    id: 23,
+    weekId: 8,
+    type: "bug-fix",
+    title: "Acceso a elementos del DOM",
+    description: "El siguiente código intenta acceder a un elemento del DOM con <b>id 'miElemento'</b>, pero tiene un error. Corrígelo.",
+    points: 3,
+    buggyCode: "const elemento = document.querySelector('miElemento');\nconsole.log(elemento);",
+    correctCode: "const elemento = document.querySelector('#miElemento');\nconsole.log(elemento);",
+  },
+  {
+    id: 24,
+    weekId: 8,
+    type: "bug-fix",
+    title: "Uso de querySelectorAll()",
+    description: "El siguiente código intenta cambiar el color de <b>todos los elementos con la clase 'items'</b>, pero tiene un error. Corrígelo.",
+    points: 5,
+    buggyCode: "const elementos = document.querySelector('.items');\nfor (let i = 0; i < elementos.length; i++) {\n  elementos[i].style.color = 'red';\n}",
+    correctCode: "const elementos = document.querySelectorAll('.items');\nfor (let i = 0; i < elementos.length; i++) {\n  elementos[i].style.color = 'red';\n}",
+  },
+  // Semana 9: Eventos
+  {
+    id: 25,
+    weekId: 9,
+    type: "multiple-choice",
+    title: "Eventos de click",
+    description: "¿Cuál es la forma correcta de agregar un evento de <b>click</b> a un botón con id 'miBoton'?",
+    points: 1,
+    options: [
+      "document.querySelector('#miBoton').onClick = miFuncion",
+      "document.querySelector('#miBoton').addEventListener('click', miFuncion)",
+      "document.querySelector('#miBoton').click(miFuncion)",
+      "document.querySelector('#miBoton').attachEvent('click', miFuncion)"
+    ],
+    correctAnswer: "document.querySelector('#miBoton').addEventListener('click', miFuncion)",
+  },
+  {
+    id: 26,
+    weekId: 9,
+    type: "bug-fix",
+    title: "Evento keyup",
+    description: "El siguiente código intenta detectar cuando el usuario <b>suelta una tecla</b> en un campo de texto, pero tiene un error. Corrígelo.",
+    points: 3,
+    buggyCode: "const input = document.querySelector('#miInput');\ninput.addEventListener('click', function(event) {\n  console.log('Tecla soltada:', event.key);\n});",
+    correctCode: "const input = document.querySelector('#miInput');\ninput.addEventListener('keyup', function(event) {\n  console.log('Tecla soltada:', event.key);\n});",
+  },
+  {
+    id: 27,
+    weekId: 9,
+    type: "multiple-choice",
+    title: "Detectar código de tecla en eventos keydown",
+    description: "¿Cuál es la forma correcta de obtener el <b>código de la tecla presionada</b> en un evento <b>keydown</b>? <br> <br> <b>Ejemplo:</b><br><pre style='background-color: #f0f0f0; color: #000; padding: 10px; border-radius: 5px;'>const input = document.querySelector('#miInput');<br>input.addEventListener('keydown', function(event) {\n  console.log('Tecla presionada:', <span style='color: blue; padding: 5px; background-color: #f0f0f0; border-radius: 5px;'>tu respuesta</span>);\n});</pre>",
+    points: 5,
+    options: [
+      "event.keyCode",
+      "event.key",
+      "event.code",
+      "event.keyPress"
+    ],
+    correctAnswer: "event.key",
+  },
+  // Semana 10: Asincronía
+  {
+    id: 28,
+    weekId: 10,
+    type: "multiple-choice",
+    title: "Asincronía en fetch",
+    description: "Indica si la siguiente afirmación es verdadera o falsa: <br><b>La función fetch en JavaScript devuelve valores de forma instantánea (síncrona) sin necesidad de esperar a que se complete la petición.</b>",
+    points: 1,
+    options: [
+      "Verdadero",
+      "Falso"
+    ],
+    correctAnswer: "Falso",
+  },
+  {
+    id: 29,
+    weekId: 10,
+    type: "multiple-choice",
+    title: "Formato de respuesta de APIs",
+    description: "¿Qué ocurre con los <b>datos devueltos por una API cuando usamos fetch</b>?<br><br><b>Ejemplo:</b><br><pre style='background-color: #f0f0f0; color: #000; padding: 10px; border-radius: 5px;'>fetch('https://api.ejemplo.com/datos')\n  .then(response => response.json())\n  .then(data => console.log(data))</pre>",
+    points: 3,
+    options: [
+      "Las APIs siempre devuelven datos en formato JSON listos para usar",
+      "El método fetch convierte automáticamente la respuesta a JSON",
+      "Es necesario convertir la respuesta con el método .json() para obtener los datos en formato utilizable",
+      "La respuesta de fetch siempre debe ser parseada con JSON.parse()"
+    ],
+    correctAnswer: "Es necesario convertir la respuesta con el método .json() para obtener los datos en formato utilizable",
+  },
+  {
+    id: 30,
+    weekId: 10,
+    type: "bug-fix",
+    title: "Consumo de API con fetch",
+    description: "El siguiente código intenta obtener datos de usuarios desde la API de JSONPlaceholder, pero tiene un error. Corrígelo para que funcione correctamente.",
+    points: 5,
+    buggyCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response)\n  .then(data => {\n    return data;\n  });\n}",
+    correctCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response.json())\n  .then(data => {\n    return data;\n  });\n}"
+  }
+
+    
 
 ]
 
@@ -535,7 +703,13 @@ export async function saveQuestionProgress(
     // Guardar localmente primero para tener respuesta inmediata en la UI
     saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer);
     
-    // Intentar guardar en el backend
+    // El usuario demo no intenta guardar en el servidor
+    if (userId === 1) {
+      console.log("Usuario demo: no se guarda progreso en servidor");
+      return;
+    }
+    
+    // Intentar guardar en el backend para usuarios normales
     await apiSaveQuestionProgress(userId, weekId, questionId, completed, points, failed, userAnswer);
     console.log("✓ Progreso guardado en el servidor correctamente");
   } catch (error) {
@@ -555,6 +729,49 @@ function saveQuestionProgressLocally(
   failed = false,
   userAnswer?: string,
 ): void {
+  // Para el usuario demo (ID = 1), no guardamos realmente su progreso
+  // Solo simulamos la respuesta para esta sesión
+  if (userId === 1) {
+    console.log("Usuario demo detectado. Se simula guardar progreso pero no se almacena permanentemente.");
+    
+    const userProgress = usersProgress.find((u) => u.userId === userId)
+    if (!userProgress) return;
+    
+    // Si es el usuario demo, temporalmente actualizamos sin guardar en localStorage
+    const existingProgressIndex = userProgress.questionProgress.findIndex(
+      (qp) => qp.questionId === questionId && qp.weekId === weekId
+    )
+    
+    if (existingProgressIndex >= 0) {
+      userProgress.questionProgress[existingProgressIndex] = {
+        userId,
+        weekId,
+        questionId,
+        completed,
+        points,
+        failed,
+        userAnswer,
+      }
+    } else {
+      userProgress.questionProgress.push({
+        userId,
+        weekId,
+        questionId,
+        completed,
+        points,
+        failed,
+        userAnswer,
+      })
+    }
+    
+    // Actualizamos el estado en memoria para la sesión actual
+    // pero no lo guardamos en localStorage
+    updateUserStats(userId, false);
+    
+    return;
+  }
+  
+  // Para usuarios normales, guardamos su progreso como siempre
   const userProgress = usersProgress.find((u) => u.userId === userId)
 
   if (!userProgress) {
@@ -599,13 +816,30 @@ function saveQuestionProgressLocally(
 }
 
 // Actualizar estadísticas del usuario
-function updateUserStats(userId: number): void {
+function updateUserStats(userId: number, saveToStorage = true): void {
   const userProgress = getUserProgress(userId)
 
+  // Para el usuario demo, desbloqueamos todas las semanas automáticamente
+  if (userId === 1) {
+    console.log("Usuario demo: Desbloqueando todas las semanas automáticamente");
+    
+    // Obtener todos los IDs de semanas
+    const allWeekIds = weeks.map(week => week.id);
+    
+    // Asignar todas las semanas como completadas
+    userProgress.completedWeekIds = [...allWeekIds];
+    userProgress.completedWeeks = allWeekIds.length;
+    
+    // No guardamos en localStorage para el usuario demo
+    return;
+  }
+  
+  // Para usuarios normales, calcular como siempre
+  
   // Calcular puntos totales
   userProgress.totalPoints = userProgress.questionProgress.reduce((total, progress) => total + progress.points, 0)
 
-  // Calcular preguntas completadas
+  // Calcular preguntas completadas (solo las correctas)
   userProgress.completedQuestions = userProgress.questionProgress.filter((progress) => progress.completed).length
 
   // Calcular semanas completadas
@@ -635,7 +869,9 @@ function updateUserStats(userId: number): void {
     usersProgress[userIndex] = userProgress
   }
   
-  // Guardar en localStorage
-  saveToLocalStorage()
+  // Guardar en localStorage solo si es necesario
+  if (saveToStorage) {
+    saveToLocalStorage()
+  }
 }
 
