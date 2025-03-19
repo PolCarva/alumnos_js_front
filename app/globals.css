@@ -53,6 +53,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -73,4 +74,12 @@ code {
   color: #f9d71c;
   padding: 0.2rem 0.4rem;
   border-radius: 0.2rem;
+}
+
+pre {
+  @apply bg-gray-100 leading-loose dark:bg-gray-800 p-3 rounded-md overflow-x-auto text-sm border border-gray-300 dark:border-gray-700;
+}
+
+pre span {
+  @apply text-blue-500 dark:text-blue-300 p-1 bg-gray-300 dark:bg-gray-500 rounded-md;
 }

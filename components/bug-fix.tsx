@@ -99,7 +99,7 @@ export function BugFixQuestion({
           <p className="text-red-700 dark:text-red-300 mt-2">
             Tu respuesta se muestra en el editor. La solución correcta es:
           </p>
-          <pre className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-md overflow-x-auto text-sm border border-gray-300 dark:border-gray-700">
+          <pre>
             {question.correctCode}
           </pre>
           <p className="text-gray-600 dark:text-gray-400 mt-3">

@@ -481,7 +481,7 @@ const questions: Question[] = [
     weekId: 9,
     type: "multiple-choice",
     title: "Detectar código de tecla en eventos keydown",
-    description: "¿Cuál es la forma correcta de obtener el <b>código de la tecla presionada</b> en un evento <b>keydown</b>? <br> <br> <b>Ejemplo:</b><br><pre style='background-color: #f0f0f0; color: #000; padding: 10px; border-radius: 5px;'>const input = document.querySelector('#miInput');<br>input.addEventListener('keydown', function(event) {\n  console.log('Tecla presionada:', <span style='color: blue; padding: 5px; background-color: #f0f0f0; border-radius: 5px;'>tu respuesta</span>);\n});</pre>",
+    description: "¿Cuál es la forma correcta de obtener el <b>código de la tecla presionada</b> en un evento <b>keydown</b>? <br> <br> <b>Ejemplo:</b><br><pre>const input = document.querySelector('#miInput');<br>input.addEventListener('keydown', function(event) {\n  console.log('Tecla presionada:', <span>tu respuesta</span>);\n});</pre>",
     points: 5,
     options: [
       "event.keyCode",
@@ -510,7 +510,7 @@ const questions: Question[] = [
     weekId: 10,
     type: "multiple-choice",
     title: "Formato de respuesta de APIs",
-    description: "¿Qué ocurre con los <b>datos devueltos por una API cuando usamos fetch</b>?<br><br><b>Ejemplo:</b><br><pre style='background-color: #f0f0f0; color: #000; padding: 10px; border-radius: 5px;'>fetch('https://api.ejemplo.com/datos')\n  .then(response => response.json())\n  .then(data => console.log(data))</pre>",
+    description: "¿Qué ocurre con los <b>datos devueltos por una API cuando usamos fetch</b>?<br><br><b>Ejemplo:</b><br><pre>fetch('https://api.ejemplo.com/datos')\n  .then(response => response.json())\n  .then(data => console.log(data))</pre>",
     points: 3,
     options: [
       "Las APIs siempre devuelven datos en formato JSON listos para usar",

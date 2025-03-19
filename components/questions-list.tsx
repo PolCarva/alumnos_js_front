@@ -600,7 +600,7 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="mr-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                    className="mr-2 border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/20"
                     onClick={() => {
                       // Reiniciar estado para permitir un nuevo intento
                       setShowingAnswerFeedback(false);
@@ -679,8 +679,8 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
                   variant="outline" 
                   size="sm" 
                   className={`${questionProgress.completed ? 
-                    "border-green-300 text-green-700 hover:bg-green-50" : 
-                    "border-red-300 text-red-700 hover:bg-red-50"}`}
+                    "border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/20" : 
+                    "border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/20"}`}
                   onClick={() => {
                     // Avanzar a la siguiente pregunta (mismo comportamiento que el botón Siguiente)
                     setShowingAnswerFeedback(false)
