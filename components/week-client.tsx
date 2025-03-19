@@ -69,6 +69,7 @@ export function WeekClient({ weekId }: WeekClientProps) {
         description: "Tu progreso se ha actualizado correctamente.",
       })
     } catch (error) {
+      console.error("Error al actualizar el progreso:", error)
       toast({
         title: "Error",
         description: "No se pudo actualizar el progreso.",

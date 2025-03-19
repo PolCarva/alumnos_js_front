@@ -46,6 +46,7 @@ export function LeaderboardClient() {
         setUsersProgress(localData)
         setError(null)
       }).catch(e => {
+        console.error("Error loading local data:", e)
         setError("No se pudieron cargar los datos del leaderboard")
       })
     } finally {
@@ -69,6 +70,7 @@ export function LeaderboardClient() {
         description: "El leaderboard se ha actualizado correctamente.",
       })
     } catch (error) {
+      console.error("Error al actualizar los datos:", error)
       toast({
         title: "Error",
         description: "No se pudieron actualizar los datos.",

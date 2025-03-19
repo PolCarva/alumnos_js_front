@@ -109,7 +109,6 @@ export function MultipleChoiceQuestion({
           </p>
         </div>
       )}
-
       {/* Retroalimentación de respuesta incorrecta */}
       {isFailed && !isCompleted && (
         <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-md border-2 border-red-300">
@@ -120,7 +119,7 @@ export function MultipleChoiceQuestion({
             La respuesta correcta es: <strong>{question.correctAnswer}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Pulsa "Siguiente" para continuar con la siguiente pregunta.
+            Pulsa &quot;Siguiente&quot; para continuar con la siguiente pregunta.
           </p>
         </div>
       )}

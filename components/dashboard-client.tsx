@@ -72,6 +72,7 @@ export function DashboardClient() {
         description: "No se pudieron actualizar los datos",
         variant: "destructive"
       })
+      console.error("Error al actualizar los datos:", error)
     } finally {
       setIsRefreshing(false)
     }

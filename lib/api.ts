@@ -1,6 +1,6 @@
 import type { UserProgress } from './types';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Función para obtener todos los usuarios para el leaderboard
 export async function fetchLeaderboard(): Promise<UserProgress[]> {

@@ -103,11 +103,10 @@ export function BugFixQuestion({
             {question.correctCode}
           </pre>
           <p className="text-gray-600 dark:text-gray-400 mt-3">
-            Pulsa "Siguiente" para continuar con la siguiente pregunta.
+            Pulsa &quot;Siguiente&quot; para continuar con la siguiente pregunta.
           </p>
         </div>
       )}
     </div>
   )
 }
-

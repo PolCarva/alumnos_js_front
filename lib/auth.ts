@@ -197,6 +197,7 @@ export async function loginUser(username: string, password: string): Promise<boo
 
       // Almacenar usuario en localStorage (sin la contraseña)
       const { password: _, ...userWithoutPassword } = user
+      console.log(_.length)
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userWithoutPassword))
       return true
     } catch (error) {
@@ -204,6 +205,7 @@ export async function loginUser(username: string, password: string): Promise<boo
       
       // Aún así permitimos el inicio de sesión
       const { password: _, ...userWithoutPassword } = user
+      console.log(_.length)
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userWithoutPassword))
       return true
     }

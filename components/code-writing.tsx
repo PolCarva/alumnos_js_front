@@ -110,6 +110,7 @@ export function CodeWritingQuestion({
     if ((isCompleted || isFailed) && question.testCases && code && testResults.length === 0) {
       executeTests()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCompleted, isFailed, question.id, code])
   
   // Función para ejecutar pruebas sobre el código
@@ -334,11 +335,10 @@ export function CodeWritingQuestion({
           )}
           
           <p className="text-gray-600 dark:text-gray-400 mt-3">
-            Pulsa "Siguiente" para continuar con la siguiente pregunta.
+            Pulsa &quot;Siguiente&quot; para continuar con la siguiente pregunta.
           </p>
         </div>
       )}
     </div>
   )
 }
-

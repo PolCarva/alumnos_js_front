@@ -39,6 +39,7 @@ export function LoginForm() {
         })
       }
     } catch (error) {
+      console.error("Error al iniciar sesión:", error)
       toast({
         title: "Error",
         description: "Ocurrió un error al iniciar sesión",
@@ -89,7 +90,7 @@ export function LoginForm() {
             {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
         </CardFooter>
-        <p className="text-sm text-gray-500 text-center pb-5"><b>Usuario:</b> demo | <b>Contraseña:</b> 53397082</p>
+        <p className="text-sm text-gray-500 text-center pb-5"><b>Usuario:</b> demo | <b>Contraseña:</b> password</p>
       </form>
     </Card>
   )
