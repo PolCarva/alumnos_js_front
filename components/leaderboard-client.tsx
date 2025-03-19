@@ -1,25 +1,81 @@
 "use client"
 
 import { redirect } from "next/navigation"
+import { useEffect, useState } from "react"
 import { getUser } from "@/lib/auth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { TrophyIcon, MedalIcon, AwardIcon } from "lucide-react"
-import { getAllUsersProgress } from "@/lib/data"
+import { TrophyIcon, MedalIcon, AwardIcon, RefreshCw } from "lucide-react"
+import type { UserProgress } from "@/lib/types"
+import { fetchLeaderboard } from "@/lib/api"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 
 type LeaderboardClientProps = {}
 
 export function LeaderboardClient() {
   const user = getUser()
+  const [usersProgress, setUsersProgress] = useState<UserProgress[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const { toast } = useToast()
 
   // Redirigir si no hay usuario autenticado
   if (!user) {
     redirect("/")
   }
 
-  // Move data fetching here from the server component
-  const usersProgress = getAllUsersProgress()
+  // Función para cargar los datos del leaderboard
+  const loadLeaderboardData = async () => {
+    try {
+      setLoading(true)
+      const data = await fetchLeaderboard()
+      setUsersProgress(data)
+      setLastUpdated(new Date())
+      setError(null)
+    } catch (err) {
+      console.error("Error fetching leaderboard data:", err)
+      setError("No se pudieron cargar los datos del leaderboard. Intentando usar datos locales...")
+      
+      // Fallback a datos locales si hay un error
+      import("@/lib/data").then(module => {
+        const localData = module.getAllUsersProgress()
+        setUsersProgress(localData)
+        setError(null)
+      }).catch(e => {
+        setError("No se pudieron cargar los datos del leaderboard")
+      })
+    } finally {
+      setLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    loadLeaderboardData()
+  }, [])
+
+  // Función para actualizar manualmente los datos
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await loadLeaderboardData()
+      toast({
+        title: "Datos actualizados",
+        description: "El leaderboard se ha actualizado correctamente.",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudieron actualizar los datos.",
+        variant: "destructive",
+      })
+    }
+  }
 
   // Ordenar por puntos (de mayor a menor)
   const sortedUsers = [...usersProgress].sort((a, b) => b.totalPoints - a.totalPoints)
@@ -27,9 +83,44 @@ export function LeaderboardClient() {
   // Encontrar la posición del usuario actual
   const currentUserRank = sortedUsers.findIndex((u) => u.userId === user.id) + 1
 
+  if (loading && !isRefreshing) {
+    return <div className="p-8 text-center">Cargando leaderboard...</div>
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>
+  }
+
+  // Formatear la fecha de última actualización
+  const formattedDate = new Intl.DateTimeFormat('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(lastUpdated)
+
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Leaderboard</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">
+            Última actualización: {formattedDate}
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Actualizando...' : 'Actualizar'}
+          </Button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {sortedUsers.slice(0, 3).map((userProgress, index) => {

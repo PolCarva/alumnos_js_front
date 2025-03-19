@@ -23,10 +23,7 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      // Simular una petición al backend
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const success = loginUser(username, password)
+      const success = await loginUser(username, password)
 
       if (success) {
         toast({

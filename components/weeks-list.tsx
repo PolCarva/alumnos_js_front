@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { LockIcon, UnlockIcon, CheckIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Week, UserProgress } from "@/lib/types"
+import { getQuestionsForWeek } from "@/lib/data"
 
 interface WeeksListProps {
   weeks: Week[]
@@ -31,12 +32,17 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
   }
 
   const getWeekProgress = (weekId: number) => {
-    const weekQuestions = userProgress.questionProgress.filter((q) => q.weekId === weekId)
-    if (weekQuestions.length === 0) return 0
-
-    // Contar preguntas intentadas (completadas o falladas)
-    const attempted = weekQuestions.filter((q) => q.completed || q.failed).length
-    return Math.round((attempted / weekQuestions.length) * 100)
+    // Obtener todas las preguntas para esta semana
+    const allQuestionsForWeek = getQuestionsForWeek(weekId)
+    if (!allQuestionsForWeek.length) return 0
+    
+    // Obtener el progreso del usuario para esta semana
+    const userQuestionsProgress = userProgress.questionProgress.filter(
+      (q) => q.weekId === weekId && (q.completed || q.failed)
+    )
+    
+    // Calcular el porcentaje basado en el número total de preguntas respondidas vs total de preguntas
+    return Math.round((userQuestionsProgress.length / allQuestionsForWeek.length) * 100)
   }
 
   return (

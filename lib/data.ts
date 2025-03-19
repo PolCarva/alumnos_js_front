@@ -1,6 +1,7 @@
 "use client"
 
 import type { Week, Question, UserProgress } from "./types"
+import { saveQuestionProgress as apiSaveQuestionProgress } from "./api"
 
 // Datos de semanas
 const weeks: Week[] = [
@@ -311,49 +312,69 @@ export function saveQuestionProgress(
   failed = false,
   userAnswer?: string,
 ): void {
-  // Obtener el progreso del usuario
-  const userProgress = getUserProgress(userId)
+  try {
+    // Intentar guardar en el backend
+    apiSaveQuestionProgress(userId, weekId, questionId, completed, points, failed, userAnswer)
+      .catch(error => {
+        console.error("Error guardando en el backend:", error)
+        // Si falla, guardar localmente como fallback
+        saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer)
+      })
+  } catch (error) {
+    console.error("Error guardando progreso:", error)
+    // Fallback a guardado local
+    saveQuestionProgressLocally(userId, weekId, questionId, completed, points, failed, userAnswer)
+  }
+}
 
-  // Buscar si ya existe un progreso para esta pregunta
-  const existingProgressIndex = userProgress.questionProgress.findIndex(
-    (p) => p.questionId === questionId && p.userId === userId,
-  )
+// Versión local de saveQuestionProgress para usar como fallback
+function saveQuestionProgressLocally(
+  userId: number,
+  weekId: number,
+  questionId: number,
+  completed: boolean,
+  points: number,
+  failed = false,
+  userAnswer?: string,
+): void {
+  const userProgress = usersProgress.find((u) => u.userId === userId)
 
-  // Si ya existe y ya estaba completada o fallada, no hacer nada
-  if (
-    existingProgressIndex !== -1 &&
-    (userProgress.questionProgress[existingProgressIndex].completed ||
-      userProgress.questionProgress[existingProgressIndex].failed)
-  ) {
+  if (!userProgress) {
+    console.error(`Usuario con ID ${userId} no encontrado`)
     return
   }
 
-  // Si ya existe pero no estaba completada ni fallada, actualizarla
-  if (existingProgressIndex !== -1) {
-    userProgress.questionProgress[existingProgressIndex].completed = completed
-    userProgress.questionProgress[existingProgressIndex].failed = failed
-    userProgress.questionProgress[existingProgressIndex].points = points
-    if (userAnswer) {
-      userProgress.questionProgress[existingProgressIndex].userAnswer = userAnswer
+  // Verificar si ya existe un registro para esta pregunta
+  const existingProgressIndex = userProgress.questionProgress.findIndex(
+    (qp) => qp.questionId === questionId && qp.weekId === weekId
+  )
+
+  if (existingProgressIndex >= 0) {
+    // Actualizar registro existente
+    userProgress.questionProgress[existingProgressIndex] = {
+      userId,
+      weekId,
+      questionId,
+      completed,
+      points,
+      failed,
+      userAnswer,
     }
   } else {
-    // Si no existe, crear un nuevo registro de progreso
+    // Crear nuevo registro
     userProgress.questionProgress.push({
       userId,
       weekId,
       questionId,
       completed,
-      failed,
       points,
+      failed,
       userAnswer,
     })
   }
 
   // Actualizar estadísticas del usuario
   updateUserStats(userId)
-
-  // Simular guardado en backend
-  console.log(`Progreso guardado para usuario ${userId}, pregunta ${questionId}`)
 }
 
 // Actualizar estadísticas del usuario
