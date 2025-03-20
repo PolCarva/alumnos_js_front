@@ -224,7 +224,7 @@ const questions: Question[] = [
     weekId: 4,
     type: "bug-fix",
     title: "Corregir declaración de función",
-    description: "La siguiente función tiene un error en cómo se define la operación para calcular el área de un rectángulo. Corrige la definición de la función.",
+    description: "La siguiente función sirve para calcular el área de un rectángulo, pero tiene un <b>error en cómo se define</b>. Corrige la definición de la función.",
     points: 3,
     buggyCode:
       "function calcularArea(base; altura) {\n  let area = base * altura;\n  return area;\n}",
@@ -237,7 +237,7 @@ const questions: Question[] = [
     type: "code-writing",
     title: "Función factorial",
     description:
-      "Escribe una función que calcule el factorial de un número n. El factorial de n es el producto de todos los enteros positivos desde 1 hasta n.",
+      "Escribe <b>una función que calcule el factorial de un número n</b>. El factorial de n es el producto de todos los enteros positivos desde 1 hasta n. <br><small><i>Nota: El factorial de 0 es 1.</i></small>",
     points: 5,
     initialCode: "function factorial(n) {\n  // Tu código aquí\n}",
     keywords: ["for", "while", "recursion", "recursiva", "multiplicación", "return"],
@@ -266,7 +266,7 @@ const questions: Question[] = [
     weekId: 5,
     type: "multiple-choice",
     title: "Método Math.random()",
-    description: "¿Qué rango de valores puede devolver el método Math.random()?",
+    description: "¿Qué rango de valores puede devolver el <b>método Math.random()</b>?",
     points: 1,
     options: [
       "Entre 0 y 1, incluyendo el 0 pero no el 1",
@@ -281,7 +281,7 @@ const questions: Question[] = [
     weekId: 5,
     type: "bug-fix",
     title: "Número aleatorio entero",
-    description: "El siguiente código intenta generar un número aleatorio entero entre 1 y 10, pero tiene un error. Corrígelo.",
+    description: "El siguiente código intenta generar un número <b>aleatorio entero entre 1 y 10</b>, pero tiene un error. Corrígelo.<br><b style='color: red;'>IMPORTANTE:</b> La respuesta deberá utilizar el método <b>Math.floor()</b> para obtener un número entero.",
     points: 3,
     buggyCode: "function numeroAleatorio() {\n  return Math.random() * 10;\n}",
     correctCode: "function numeroAleatorio() {\n  return Math.floor(Math.random() * 10) + 1;\n}",
@@ -296,6 +296,15 @@ const questions: Question[] = [
     initialCode: "function redondearDecena(numero) {\n  // Tu código aquí\n}",
     keywords: ["Math.ceil", "Math.round", "Math.floor", "decena", "return"],
     testCases: [
+      
+      {
+        input: "redondearDecena(-5)",
+        expectedOutput: "0",
+      },
+      {
+        input: "redondearDecena(0)",
+        expectedOutput: "0",
+      },
       {
         input: "redondearDecena(12)",
         expectedOutput: "20",
@@ -305,12 +314,12 @@ const questions: Question[] = [
         expectedOutput: "10",
       },
       {
-        input: "redondearDecena(35)",
-        expectedOutput: "40",
-      },
-      {
         input: "redondearDecena(99)",
         expectedOutput: "100",
+      },
+      {
+        input: "redondearDecena(112)",
+        expectedOutput: "120",
       }
     ],
   },
@@ -320,7 +329,7 @@ const questions: Question[] = [
     weekId: 6,
     type: "multiple-choice",
     title: "Método push en Arrays",
-    description: "¿Qué hace el método push() en un array de JavaScript?",
+    description: "¿Qué hace el <b>método push()</b> en un array de JavaScript?",
     points: 1,
     options: [
       "Elimina el último elemento del array",
@@ -335,7 +344,7 @@ const questions: Question[] = [
     weekId: 6,
     type: "bug-fix",
     title: "Eliminar el último elemento",
-    description: "El siguiente código intenta eliminar el último elemento de un array y devolverlo, pero tiene un error. Corrígelo.",
+    description: "El siguiente código intenta <b>eliminar el último elemento de un array y devolverlo</b>, pero tiene un error. Corrígelo.",
     points: 3,
     buggyCode: "function eliminarUltimo(array) {\n  return array.push();\n}",
     correctCode: "function eliminarUltimo(array) {\n  return array.pop();\n}",
@@ -345,10 +354,10 @@ const questions: Question[] = [
     weekId: 6,
     type: "code-writing",
     title: "Acceso por índice",
-    description: "Escribe una función que devuelva el elemento central de un array. Si el array tiene un número par de elementos, devuelve el elemento en la posición (longitud/2)-1.",
+    description: "Escribe una función que devuelva el <b>elemento central de un array</b>. Si el array tiene un número par de elementos, devuelve el elemento en la posición <b>(longitud/2)-1</b>.",
     points: 5,
     initialCode: "function elementoCentral(array) {\n  // Tu código aquí\n}",
-    keywords: ["length", "index", "array", "return", "Math.floor"],
+    keywords: ["length", "index", "array", "return", "Math.ceil"],
     testCases: [
       {
         input: "elementoCentral([1, 2, 3])",
@@ -370,7 +379,7 @@ const questions: Question[] = [
     weekId: 7,
     type: "multiple-choice",
     title: "Método Object.keys()",
-    description: "¿Qué hace el método Object.keys() en un objeto de JavaScript?",
+    description: "¿Qué hace el método <b>Object.keys()</b> en un objeto de JavaScript?",
     points: 1,
     options: [
       "Devuelve un array con las propiedades enumerables del objeto",
@@ -385,7 +394,7 @@ const questions: Question[] = [
     weekId: 7,
     type: "bug-fix",
     title: "Acceso a propiedades de un auto",
-    description: "El siguiente código intenta acceder a las propiedades de un objeto auto, pero tiene un error. Corrígelo.",
+    description: "El siguiente código intenta acceder a las <b>propiedades de un objeto auto</b>, pero tiene un error. Corrígelo.",
     points: 3,
     buggyCode: "const auto = {marca: 'Toyota', modelo: 'Corolla', año: 2022};\nconsole.log(marca);",
     correctCode: "const auto = {marca: 'Toyota', modelo: 'Corolla', año: 2022};\nconsole.log(auto.marca);",
@@ -395,7 +404,7 @@ const questions: Question[] = [
     weekId: 7,
     type: "code-writing",
     title: "Método Object.values()",
-    description: "Escribe una función que devuelva un array con los valores de las propiedades enumerables de un objeto.",
+    description: "Escribe una función que devuelva un array con los <b>valores de las propiedades enumerables de un objeto</b>.",
     points: 5,
     initialCode: "function obtenerValores(objeto) {\n  // Tu código aquí\n}",
     keywords: ["Object.values", "values", "for", "in"],
