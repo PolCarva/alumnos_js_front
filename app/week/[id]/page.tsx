@@ -68,7 +68,7 @@ export default function WeekPage({ params }: WeekPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto pt-4">
+      <div className="container px-5 mx-auto pt-4">
         <Link 
           href="/dashboard" 
           className="flex items-center text-blue-500 hover:text-blue-700 transition-colors"
