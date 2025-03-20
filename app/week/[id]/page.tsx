@@ -90,7 +90,7 @@ export default function WeekPage({ params }: WeekPageProps) {
           Volver al dashboard
         </Link>
       </div>
-      <div className="container py-4 mx-auto md:py-8">
+      <div className="container px-5 py-4 mx-auto md:py-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">
           Semana {week.id}: {week.title}
         </h1>
