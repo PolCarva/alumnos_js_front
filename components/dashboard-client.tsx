@@ -132,7 +132,7 @@ export function DashboardClient() {
       
       <div className="flex flex-col md:flex-row gap-2 justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Panel de actividades</h1>
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
@@ -141,7 +141,7 @@ export function DashboardClient() {
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           {isRefreshing ? "Actualizando..." : "Actualizar"}
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -154,16 +154,16 @@ export function DashboardClient() {
             <h2 className="text-xl font-semibold mb-4">Tu progreso</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Puntos totales</p>
+                <div className="flex flex-col h-full">
+                  <p className="text-sm text-gray-500 mb-auto">Puntos totales</p>
                   <p className="text-2xl font-bold text-blue-600">{userProgress.totalPoints}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Preguntas completadas</p>
+                <div className="flex flex-col h-full">
+                  <p className="text-sm text-gray-500 mb-auto">Preguntas completadas</p>
                   <p className="text-2xl font-bold text-blue-600">{userProgress.completedQuestions}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Semanas completadas</p>
+                <div className="flex flex-col h-full">
+                  <p className="text-sm text-gray-500 mb-auto">Semanas completadas</p>
                   <p className="text-2xl font-bold text-blue-600">{userProgress.completedWeeks}</p>
                 </div>
               </div>
