@@ -86,7 +86,7 @@ const questions: Question[] = [
     weekId: 1,
     type: "bug-fix",
     title: "Constantes en JavaScript",
-    description: "El siguiente código intenta incrementar el valor de una constante, pero tiene un error. Corrígelo.",
+    description: "El siguiente código intenta incrementar el valor de una <b>variable</b>, pero tiene un error. Corrígelo.",
     points: 3,
     buggyCode: "const numero = 5;\nnumero = numero + 1;\nconsole.log(numero);",
     correctCode: "let numero = 5;\nnumero = numero + 1;\nconsole.log(numero);",
