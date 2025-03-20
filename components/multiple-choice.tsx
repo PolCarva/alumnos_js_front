@@ -1,11 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import type { Question } from "@/lib/types"
 import { CheckIcon, XIcon } from "lucide-react"
+
+// Función para mezclar un array (algoritmo Fisher-Yates)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 interface MultipleChoiceQuestionProps {
   question: Question
@@ -25,6 +35,12 @@ export function MultipleChoiceQuestion({
   userAnswer,
 }: MultipleChoiceQuestionProps) {
   const [selectedOption, setSelectedOption] = useState<string>("")
+  
+  // Generamos un orden aleatorio de las opciones una sola vez al montar el componente
+  const randomizedOptions = useMemo(() => {
+    if (!question.options) return [];
+    return shuffleArray(question.options);
+  }, [question.id]); // Solo regenera cuando cambia la pregunta
   
   // Efecto único para cuando cambia la pregunta o su estado
   useEffect(() => {
@@ -62,7 +78,7 @@ export function MultipleChoiceQuestion({
         className="space-y-2"
         disabled={isDisabled}
       >
-        {question.options?.map((option) => (
+        {randomizedOptions.map((option) => (
           <div
             key={option}
             className={`flex items-center space-x-2 rounded-md border p-4 ${

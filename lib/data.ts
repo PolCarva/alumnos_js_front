@@ -166,7 +166,7 @@ const questions: Question[] = [
     weekId: 3,
     type: "bug-fix",
     title: "Corregir bucle for",
-    description: "El siguiente código debería mostrar los números del 1 al 5 usando un bucle for, pero tiene un error. Corrígelo.",
+    description: "El siguiente código debería mostrar los números <b>del 1 al 5</b> usando un bucle <b>for</b>, pero tiene un error. Corrígelo.",
     points: 3,
     buggyCode:
       "// Mostrar números del 1 al 5\nfor (let i = 1; i > 5; i++) {\n  console.log(i);\n}",
@@ -209,7 +209,7 @@ const questions: Question[] = [
     weekId: 4,
     type: "multiple-choice",
     title: "Conceptos básicos de funciones",
-    description: "¿Cuál de las siguientes opciones es la forma correcta de declarar una función en JavaScript?",
+    description: "¿Cuál de las siguientes opciones es la <b>forma correcta de declarar una función en JavaScript</b>?",
     points: 1,
     options: [
       "function miFuncion() { return true; }",
