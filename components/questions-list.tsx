@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { CheckIcon, XIcon, AlertCircleIcon } from "lucide-react"
 import type { Question, UserProgress, QuestionProgress } from "@/lib/types"
 import { MultipleChoiceQuestion } from "./multiple-choice"
-import { BugFixQuestion } from "./bug-fix"
+import { BugFixQuestion, normalizeCode } from "./bug-fix"
 import { CodeWritingQuestion } from "./code-writing"
 import { saveQuestionProgress } from "@/lib/data"
 import { useToast } from "@/components/ui/use-toast"
@@ -333,7 +333,21 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
             
           case "bug-fix":
             console.log(`Comparando código arreglado con solución correcta`);
-            const isFixed = answer === currentQuestion.correctCode;
+            // Normalizar tanto la respuesta del usuario como la respuesta correcta
+            const userCodeNormalized = normalizeCode(answer as string);
+            const correctCodeNormalized = normalizeCode(currentQuestion.correctCode || "");
+            
+            // Verificar si son exactamente iguales (formato original)
+            const isExactMatch = answer === currentQuestion.correctCode;
+            
+            // Verificar si son lógicamente iguales (después de normalizar)
+            const isLogicallyCorrect = userCodeNormalized === correctCodeNormalized;
+            
+            console.log(`Comparación exacta: ${isExactMatch}, Comparación normalizada: ${isLogicallyCorrect}`);
+            
+            // Considerar correcta si coincide exactamente o después de normalizar
+            const isFixed = isExactMatch || isLogicallyCorrect;
+            
             resolve({ 
               correct: isFixed,
               points: isFixed ? currentQuestion.points : 0
@@ -450,6 +464,14 @@ export function QuestionsList({ questions, weekId, userId, userProgress, onQuest
               isCompleted={isQuestionCompleted}
               isFailed={isQuestionFailed}
               userAnswer={userAnswer}
+              isCorrectLogically={!isQuestionCompleted && isQuestionFailed && (() => {
+                // Verificar si es lógicamente correcta aunque el formato sea diferente
+                if (!userAnswer || !currentQuestion.correctCode) return false;
+                
+                const userCodeNormalized = normalizeCode(userAnswer);
+                const correctCodeNormalized = normalizeCode(currentQuestion.correctCode);
+                return userCodeNormalized === correctCodeNormalized;
+              })()}
             />
             {isSubmitting && showingAnswerFeedback && (
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
