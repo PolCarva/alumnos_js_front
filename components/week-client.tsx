@@ -144,7 +144,7 @@ export function WeekClient({ weekId }: WeekClientProps) {
   }
 
   return (
-    <div>
+    <div className="px-5">
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard")} className="mb-2">
