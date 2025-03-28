@@ -3,6 +3,7 @@ export interface User {
   name: string
   username: string
   password: string // En una aplicación real, esto sería un hash
+  class?: 'M' | 'L' | 'V'
 }
 
 export interface Week {
