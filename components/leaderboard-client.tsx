@@ -11,6 +11,7 @@ import type { UserProgress } from "@/lib/types"
 import { fetchLeaderboard } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select"
 
 
 export function LeaderboardClient() {
@@ -21,6 +22,7 @@ export function LeaderboardClient() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [selectedClass, setSelectedClass] = useState<string>("all")
   const { toast } = useToast()
 
   // Redirigir si no hay usuario autenticado
@@ -85,6 +87,11 @@ export function LeaderboardClient() {
   // Encontrar la posición del usuario actual
   const currentUserRank = sortedUsers.findIndex((u) => u.userId === user.id) + 1
 
+  // Filtrar usuarios por clase
+  const filteredUsers = selectedClass === "all" 
+    ? sortedUsers 
+    : sortedUsers.filter(u => u.userClass === selectedClass)
+
   if (loading && !isRefreshing) {
     return <div className="p-8 text-center">Cargando leaderboard...</div>
   }
@@ -108,6 +115,16 @@ export function LeaderboardClient() {
       <div className="flex flex-col md:flex-row gap-2 justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Leaderboard</h1>
         <div className="flex items-center gap-4">
+          <Select value={selectedClass} onValueChange={setSelectedClass}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filtrar por clase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las clases</SelectItem>
+              <SelectItem value="L">Lunes</SelectItem>
+              <SelectItem value="M">Miércoles</SelectItem>
+            </SelectContent>
+          </Select>
           <span className="text-sm text-gray-500">
             Última actualización: {formattedDate}
           </span>
@@ -125,7 +142,7 @@ export function LeaderboardClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {sortedUsers.slice(0, 3).map((userProgress, index) => {
+        {filteredUsers.slice(0, 3).map((userProgress, index) => {
           const medalColors = [
             "bg-yellow-100 text-yellow-800 border-yellow-300",
             "bg-gray-100 text-gray-800 border-gray-300",
@@ -158,7 +175,12 @@ export function LeaderboardClient() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{userProgress.userName}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{userProgress.userName}</p>
+                      <Badge variant="secondary" className="capitalize">
+                        {userProgress.userClass === 'L' ? 'Lunes' : userProgress.userClass === 'M' ? 'Miércoles' : 'Viernes'}
+                      </Badge>
+                    </div>
                     <p className="text-sm text-gray-500">{userProgress.completedQuestions} preguntas completadas</p>
                   </div>
                 </div>
@@ -196,7 +218,7 @@ export function LeaderboardClient() {
                 </tr>
               </thead>
               <tbody>
-                {(showAll ? sortedUsers : sortedUsers.slice(0, 10)).map((userProgress, index) => (
+                {(showAll ? filteredUsers : filteredUsers.slice(0, 10)).map((userProgress, index) => (
                   <tr
                     key={userProgress.userId}
                     className={`border-b ${userProgress.userId === user.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
@@ -208,12 +230,17 @@ export function LeaderboardClient() {
                           {userProgress.userName.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      {userProgress.userName}
-                      {userProgress.userId === user.id && (
-                        <Badge variant="outline" className="ml-2">
-                          Tú
+                      <div className="flex items-center gap-2">
+                        {userProgress.userName}
+                        <Badge variant="secondary" className="capitalize">
+                          {userProgress.userClass === 'L' ? 'Lunes' : userProgress.userClass === 'M' ? 'Miércoles' : 'Viernes'}
                         </Badge>
-                      )}
+                        {userProgress.userId === user.id && (
+                          <Badge variant="outline" className="ml-2">
+                            Tú
+                          </Badge>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-right">{userProgress.completedQuestions}</td>
                     <td className="px-4 py-3 text-right font-bold">{userProgress.totalPoints}</td>
@@ -235,6 +262,9 @@ export function LeaderboardClient() {
                     Tu posición: {currentUserRank}
                   </Badge>
                   <span className="font-medium">{user.name}</span>
+                  <Badge variant="secondary" className="capitalize">
+                    {usersProgress.find(u => u.userId === user.id)?.userClass === 'L' ? 'Lunes' : usersProgress.find(u => u.userId === user.id)?.userClass === 'M' ? 'Miércoles' : 'Viernes'}
+                  </Badge>
                 </div>
                 <span className="font-bold text-blue-600">
                   {sortedUsers.find((u) => u.userId === user.id)?.totalPoints || 0} pts

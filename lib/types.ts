@@ -49,6 +49,7 @@ export interface QuestionProgress {
 export interface UserProgress {
   userId: number
   userName: string
+  userClass: 'M' | 'L' | 'V'
   totalPoints: number
   completedQuestions: number
   completedWeeks: number

@@ -549,6 +549,7 @@ const usersProgress: UserProgress[] = [
   {
     userId: 1,
     userName: "Estudiante Demo",
+    userClass: "M",
     totalPoints: 0,
     completedQuestions: 0,
     completedWeeks: 0,
@@ -558,6 +559,7 @@ const usersProgress: UserProgress[] = [
   {
     userId: 2,
     userName: "Juan Pérez",
+    userClass: "M",
     totalPoints: 0,
     completedQuestions: 0,
     completedWeeks: 0,
@@ -567,6 +569,7 @@ const usersProgress: UserProgress[] = [
   {
     userId: 3,
     userName: "María García",
+    userClass: "M",
     totalPoints: 0,
     completedQuestions: 0,
     completedWeeks: 0,
@@ -576,6 +579,7 @@ const usersProgress: UserProgress[] = [
   {
     userId: 4,
     userName: "Carlos López",
+    userClass: "M",
     totalPoints: 0,
     completedQuestions: 0,
     completedWeeks: 0,
@@ -585,6 +589,7 @@ const usersProgress: UserProgress[] = [
   {
     userId: 5,
     userName: "Ana Martínez",
+    userClass: "M",
     totalPoints: 0,
     completedQuestions: 0,
     completedWeeks: 0,
@@ -667,6 +672,7 @@ export function getUserProgress(userId: number): UserProgress {
     const newUserProgress: UserProgress = {
       userId,
       userName: `Usuario ${userId}`, // Nombre temporal
+      userClass: "M", // Clase por defecto
       totalPoints: 0,
       completedQuestions: 0,
       completedWeeks: 0,
