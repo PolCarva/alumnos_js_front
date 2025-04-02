@@ -8,7 +8,7 @@ const dummyUsers: User[] = [
     id: 1,
     name: "Estudiante Demo",
     username: "demo",
-    password: "password",
+    password: "admin123",
     class: "M"
   },
   {
