@@ -82,7 +82,7 @@ export function LeaderboardClient() {
   }
 
   // Ordenar por puntos (de mayor a menor)
-  const sortedUsers = [...usersProgress].filter(user => user.userId !== 1).sort((a, b) => b.totalPoints - a.totalPoints)
+  const sortedUsers = [...usersProgress].filter(user => user.userId !== 1 && user.userId !== 99).sort((a, b) => b.totalPoints - a.totalPoints)
 
   // Encontrar la posición del usuario actual
   const currentUserRank = sortedUsers.findIndex((u) => u.userId === user.id) + 1
