@@ -9,14 +9,14 @@ import { CheckIcon, XIcon } from "lucide-react"
 // Función para normalizar el código
 export function normalizeCode(code: string): string {
   return code
-    .replace(/\s+/g, ' ')           // Normaliza espacios múltiples a un solo espacio
-    .replace(/[\r\n]+/g, ' ')       // Normaliza saltos de línea a espacios
-    .replace(/['"`]/g, '"')         // Estandariza comillas (simple, doble, backtick) a dobles
-    .replace(/;(\s*[}\)])/g, '$1')  // Elimina punto y coma antes de } o )
-    .replace(/\s*([{}():;,=+\-*/])\s*/g, '$1') // Elimina espacios alrededor de operadores y puntuación
-    .replace(/\(\s+/g, '(')         // Elimina espacios después de paréntesis abierto
-    .replace(/\s+\)/g, ')')         // Elimina espacios antes de paréntesis cerrado
-    .trim();                        // Elimina espacios al inicio y final
+    .replace(/\s+/g, ' ')            // Normaliza espacios múltiples a un solo espacio
+    .replace(/[\r\n]+/g, ' ')        // Normaliza saltos de línea a espacios
+    .replace(/['"`]/g, '"')          // Estandariza comillas a dobles
+    .replace(/;/g, '')               // Elimina todos los puntos y coma
+    .replace(/\s*([{}():,=+\-*/])\s*/g, '$1') // Elimina espacios alrededor de operadores y puntuación
+    .replace(/\s+/g, '(')          // Elimina espacios después de paréntesis abierto
+    .replace(/\s+/g, ')')          // Elimina espacios antes de paréntesis cerrado
+    .trim();                         // Elimina espacios al inicio y final
 }
 
 interface BugFixQuestionProps {
