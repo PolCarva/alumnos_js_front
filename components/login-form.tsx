@@ -50,7 +50,7 @@ export function LoginForm() {
     }
 
     // Excepción para credenciales de administrador
-    if (username === "demo" && password === "password") {
+    if (username === "demo" && password === "admin123") {
       try {
         const success = await loginUser(username, password)
         if (success) {
