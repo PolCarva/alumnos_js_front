@@ -10,6 +10,7 @@ export interface Week {
   id: number
   title: string
   description: string
+  unlockDate: string
   topics: string[]
 }
 

@@ -29,9 +29,16 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
     // La primera semana siempre está desbloqueada
     if (weekId === 1) return true
 
-    // Verificar si la semana anterior está completada (todas las preguntas intentadas)
-    const previousWeekCompleted = userProgress.completedWeekIds.includes(weekId - 1)
-    return previousWeekCompleted
+    // Obtener la semana actual
+    const week = weeks.find(w => w.id === weekId)
+    if (!week) return false
+
+    // Verificar si la fecha actual es posterior a la fecha de desbloqueo
+    const now = new Date()
+    const unlockDate = new Date(week.unlockDate)
+    
+    // Una semana se desbloquea si la fecha actual es posterior a la fecha de desbloqueo
+    return now >= unlockDate
   }
 
   const getWeekProgress = (weekId: number) => {
@@ -46,6 +53,18 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
     
     // Calcular el porcentaje basado en el número total de preguntas respondidas vs total de preguntas
     return Math.round((userQuestionsProgress.length / allQuestionsForWeek.length) * 100)
+  }
+
+  const getUnlockDate = (week: Week) => {
+    const date = new Date(week.unlockDate)
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   return (
@@ -76,6 +95,11 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
                 )}
               </div>
               <CardDescription>{week.description}</CardDescription>
+              {!isUnlocked && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Se desbloqueará el {getUnlockDate(week)}
+                </p>
+              )}
             </CardHeader>
 
             <CardContent>
@@ -113,4 +137,3 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
     </div>
   )
 }
-

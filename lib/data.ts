@@ -4,65 +4,75 @@ import type { Week, Question, UserProgress } from "./types"
 import { saveQuestionProgress as apiSaveQuestionProgress } from "./api"
 
 // Datos de semanas
-const weeks: Week[] = [
+export const weeks: Week[] = [
   {
     id: 1,
     title: "Variables",
     description: "Fundamentos básicos del lenguaje JavaScript",
+    unlockDate: "2025-03-17T03:00:00.000Z",
     topics: ["variables", "constantes", "const", "let", "var"]
   },
   {
     id: 2,
     title: "Condicionales",
     description: "Estructuras de control en JavaScript",
+    unlockDate: "2025-03-24T03:00:00.000Z",
     topics: ["if", "else", "switch", "condiciones", "comparaciones"],
   },
   {
     id: 3,
     title: "Repetitivas",
     description: "Estructuras de control en JavaScript",
+    unlockDate: "2025-03-31T03:00:00.000Z",
     topics: ["for", "while", "bucles", "iteraciones"],
   },
   {
     id: 4,
     title: "Funciones",
     description: "Conceptos básicos de funciones en JavaScript",
+    unlockDate: "2025-04-07T03:00:00.000Z",
     topics: ["function", "return", "parametros", "llamadas"],
   },
   {
     id: 5,
     title: "Objetos nativos",
     description: "Objetos nativos de JavaScript",
+    unlockDate: "2025-04-14T03:00:00.000Z",
     topics: ["Math", "Date", "Array", "String", "Object"],
   },
   {
     id: 6,
     title: "Arrays",
     description: "Introducción a arrays en JavaScript",
+    unlockDate: "2025-04-21T03:00:00.000Z",
     topics: ["array", "push", "pop", "shift", "unshift"],
   },
   {
     id: 7,
     title: "Objetos",
     description: "Introducción a objetos en JavaScript",
+    unlockDate: "2025-04-28T03:00:00.000Z",
     topics: ["object", "keys", "values", "entries"],
   },
   {
     id: 8,
     title: "Elementos del DOM",
     description: "Introducción a elementos del DOM en JavaScript",
+    unlockDate: "2025-05-05T03:00:00.000Z",
     topics: ["document", "getElementById", "querySelector", "querySelectorAll"],
   },
   {
     id: 9,
     title: "Eventos",
     description: "Introducción a eventos en JavaScript",
+    unlockDate: "2025-05-12T03:00:00.000Z",
     topics: ["addEventListener", "removeEventListener", "event", "target"],
   },
   {
     id: 10,
     title: "Fetch",
     description: "Introducción a fetch en JavaScript",
+    unlockDate: "2025-05-19T03:00:00.000Z",
     topics: ["fetch", "then", "try", "catch", "async", "await"],
   }
 ]
@@ -117,15 +127,19 @@ const questions: Question[] = [
   {
     id: 5,
     weekId: 2,
-    type: "bug-fix",
-    title: "Corregir condicional if-else",
+    type: "code-writing",
+    title: "Verificación de mayoría de edad",
     description:
-      "El siguiente código debería mostrar 'Mayor de edad' si la edad <b>es igual a 18 o mayor</b>, y 'Menor de edad' en caso contrario. Corrige el error.",
+      "Escribe una función que reciba la edad de una persona y devuelva <b>'Mayor de edad'</b> si la edad es igual a 18 o mayor, y <b>'Menor de edad'</b> en caso contrario.",
     points: 3,
-    buggyCode:
-      "const edad = 18;\nif (edad < 18) {\n  console.log('Mayor de edad');\n} else {\n  console.log('Menor de edad');\n}",
-    correctCode:
-      "const edad = 18;\nif (edad >= 18) {\n  console.log('Mayor de edad');\n} else {\n  console.log('Menor de edad');\n}",
+    initialCode: "function verificarEdad(edad) {\n  // Tu código aquí\n}",
+    keywords: ["if", "else", "return", "edad", ">=", "18"],
+    testCases: [
+      { input: "verificarEdad(18)", expectedOutput: "'Mayor de edad'" },
+      { input: "verificarEdad(17)", expectedOutput: "'Menor de edad'" },
+      { input: "verificarEdad(25)", expectedOutput: "'Mayor de edad'" },
+      { input: "verificarEdad(10)", expectedOutput: "'Menor de edad'" }
+    ],
   },
   {
     id: 6,
