@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { LockIcon, UnlockIcon, CheckIcon } from "lucide-react"
+import { LockIcon, UnlockIcon, CheckIcon, ClockIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Week, UserProgress } from "@/lib/types"
 import { getQuestionsForWeek } from "@/lib/data"
@@ -75,6 +75,8 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
         const isUnlocked = isWeekUnlocked(week.id)
         const isCompleted = userProgress.completedWeekIds.includes(week.id)
         const progress = getWeekProgress(week.id)
+        const unlockDate = getUnlockDate(week.id)
+        const isTestUser = userProgress.userId === 99
 
         return (
           <Card key={week.id} className={`transition-all ${isUnlocked ? "opacity-100" : "opacity-70"}`}>
@@ -113,7 +115,7 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
                   <h3 className="text-sm font-medium">Temas de la semana:</h3>
                   <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
                     {week.topics.map((topic, index) => (
-                      <li key={index}>{topic}</li>
+                      <li key={index}>{topic.title}</li>
                     ))}
                   </ul>
                 </div>

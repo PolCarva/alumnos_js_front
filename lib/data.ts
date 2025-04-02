@@ -553,9 +553,6 @@ const questions: Question[] = [
     buggyCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response)\n  .then(data => {\n    return data;\n  });\n}",
     correctCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response.json())\n  .then(data => {\n    return data;\n  });\n}"
   }
-
-    
-
 ]
 
 // Datos de progreso de usuarios (inicialmente vacío)
@@ -855,52 +852,58 @@ function updateUserStats(userId: number, saveToStorage = true): void {
     // Obtener todos los IDs de semanas
     const allWeekIds = weeks.map(week => week.id);
     
-    // Asignar todas las semanas como completadas
-    userProgress.completedWeekIds = [...allWeekIds];
-    userProgress.completedWeeks = allWeekIds.length;
+    // Actualizar completedWeekIds con todas las semanas
+    userProgress.completedWeekIds = allWeekIds;
     
-    // No guardamos en localStorage para el usuario demo
+    // Calcular puntos totales
+    userProgress.totalPoints = userProgress.questionProgress.reduce((total, q) => total + q.points, 0);
+    
+    // Calcular preguntas completadas
+    userProgress.completedQuestions = userProgress.questionProgress.filter(q => q.completed).length;
+    
+    if (saveToStorage) {
+      saveToLocalStorage();
+    }
     return;
   }
+
+  // Para usuarios normales, calcular las semanas completadas
+  const now = new Date();
+  const completedWeeks: number[] = [];
   
-  // Para usuarios normales, calcular como siempre
+  weeks.forEach(week => {
+    // Verificar si la fecha actual es posterior a la fecha de desbloqueo
+    const unlockDate = new Date(week.unlockDate);
+    if (now < unlockDate) return; // Si la semana aún no está desbloqueada, no la marcamos como completada
+    
+    // Obtener todas las preguntas para esta semana
+    const weekQuestions = getQuestionsForWeek(week.id);
+    
+    // Verificar si todas las preguntas han sido intentadas (completadas o fallidas)
+    const allQuestionsAttempted = weekQuestions.every(question => {
+      return userProgress.questionProgress.some(
+        progress => progress.questionId === question.id && 
+                   progress.weekId === week.id && 
+                   (progress.completed || progress.failed)
+      );
+    });
+    
+    if (allQuestionsAttempted) {
+      completedWeeks.push(week.id);
+    }
+  });
+  
+  // Actualizar completedWeekIds
+  userProgress.completedWeekIds = completedWeeks;
   
   // Calcular puntos totales
-  userProgress.totalPoints = userProgress.questionProgress.reduce((total, progress) => total + progress.points, 0)
-
-  // Calcular preguntas completadas (solo las correctas)
-  userProgress.completedQuestions = userProgress.questionProgress.filter((progress) => progress.completed).length
-
-  // Calcular semanas completadas
-  const weekIds = weeks.map((week) => week.id)
-  const completedWeekIds: number[] = []
-
-  for (const weekId of weekIds) {
-    const weekQuestions = questions.filter((q) => q.weekId === weekId)
-
-    // Considerar una pregunta como intentada si está completada O fallada
-    const attemptedQuestions = userProgress.questionProgress.filter(
-      (p) => p.weekId === weekId && (p.completed || p.failed),
-    )
-
-    // Una semana está completada si todas sus preguntas han sido intentadas
-    if (weekQuestions.length > 0 && attemptedQuestions.length === weekQuestions.length) {
-      completedWeekIds.push(weekId)
-    }
-  }
-
-  userProgress.completedWeekIds = completedWeekIds
-  userProgress.completedWeeks = completedWeekIds.length
-
-  // Actualizar en la lista de usuarios
-  const userIndex = usersProgress.findIndex((p) => p.userId === userId)
-  if (userIndex !== -1) {
-    usersProgress[userIndex] = userProgress
-  }
+  userProgress.totalPoints = userProgress.questionProgress.reduce((total, q) => total + q.points, 0);
   
-  // Guardar en localStorage solo si es necesario
+  // Calcular preguntas completadas
+  userProgress.completedQuestions = userProgress.questionProgress.filter(q => q.completed).length;
+  
   if (saveToStorage) {
-    saveToLocalStorage()
+    saveToLocalStorage();
   }
 }
 

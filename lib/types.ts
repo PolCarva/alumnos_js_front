@@ -4,6 +4,7 @@ export interface User {
   username: string
   password: string // En una aplicación real, esto sería un hash
   class?: 'M' | 'L' | 'V'
+  isTestUser?: boolean
 }
 
 export interface Week {
