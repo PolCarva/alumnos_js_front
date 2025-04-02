@@ -193,7 +193,7 @@ const questions: Question[] = [
     type: "code-writing",
     title: "Sumar números pares",
     description:
-      "Escribe una función que sume todos los números pares desde 1 hasta n (inclusive). Utiliza un bucle para resolver este problema.",
+      "Escribe una función que <b>sume todos los números pares desde 1 hasta n (inclusive)</b>. Utiliza un bucle para resolver este problema.",
     points: 5,
     initialCode: "function sumarPares(n) {\n  // Tu código aquí\n}",
     keywords: ["for", "while", "loop", "bucle", "suma", "pares", "if", "return"],
