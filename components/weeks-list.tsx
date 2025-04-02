@@ -115,7 +115,7 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
                   <h3 className="text-sm font-medium">Temas de la semana:</h3>
                   <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
                     {week.topics.map((topic, index) => (
-                      <li key={index}>{topic.title}</li>
+                      <li key={index}>{topic}</li>
                     ))}
                   </ul>
                 </div>
