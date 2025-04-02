@@ -338,7 +338,7 @@ const dummyUsers: User[] = [
     name: "Juan Francisco Otheguy",
     username: "221436",
     password: "54181305",
-    class: "L"
+    class: "M"
   },
   {
     id: 49,
@@ -388,6 +388,14 @@ const dummyUsers: User[] = [
     username: "329488",
     password: "56154526",
     class: "L"
+  },
+  {
+    id: 99,
+    name: "Pablo Carvalho (Test)",
+    username: "269215",
+    password: "51449148",
+    class: "L",
+    isTestUser: true
   }
 ]
 

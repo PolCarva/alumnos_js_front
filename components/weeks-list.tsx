@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { LockIcon, UnlockIcon, CheckIcon } from "lucide-react"
+import { LockIcon, UnlockIcon, CheckIcon, ClockIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Week, UserProgress } from "@/lib/types"
 import { getQuestionsForWeek } from "@/lib/data"
@@ -29,8 +29,21 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
     // La primera semana siempre está desbloqueada
     if (weekId === 1) return true
 
+    // Obtener la semana actual
+    const week = weeks.find(w => w.id === weekId)
+    if (!week) return false
+
+    // Verificar si la fecha actual es posterior a la fecha de desbloqueo
+    const now = new Date()
+    const unlockDate = new Date(week.unlockDate)
+    
+    // Si la fecha actual es anterior a la fecha de desbloqueo, la semana está bloqueada
+    if (now < unlockDate) return false
+
     // Verificar si la semana anterior está completada (todas las preguntas intentadas)
     const previousWeekCompleted = userProgress.completedWeekIds.includes(weekId - 1)
+    
+    // Una semana solo se desbloquea si la anterior está completada Y la fecha actual es posterior a la fecha de desbloqueo
     return previousWeekCompleted
   }
 
@@ -48,6 +61,22 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
     return Math.round((userQuestionsProgress.length / allQuestionsForWeek.length) * 100)
   }
 
+  const getUnlockDate = (weekId: number) => {
+    const week = weeks.find(w => w.id === weekId)
+    if (!week) return null
+    
+    const unlockDate = new Date(week.unlockDate)
+    return unlockDate.toLocaleDateString('es-UY', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Montevideo'
+    })
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold mb-4">Semanas de aprendizaje</h2>
@@ -56,6 +85,8 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
         const isUnlocked = isWeekUnlocked(week.id)
         const isCompleted = userProgress.completedWeekIds.includes(week.id)
         const progress = getWeekProgress(week.id)
+        const unlockDate = getUnlockDate(week.id)
+        const isTestUser = userProgress.userId === 99
 
         return (
           <Card key={week.id} className={`transition-all ${isUnlocked ? "opacity-100" : "opacity-70"}`}>
@@ -76,6 +107,17 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
                 )}
               </div>
               <CardDescription>{week.description}</CardDescription>
+              {!isUnlocked && unlockDate && (
+                <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <ClockIcon className="h-4 w-4" />
+                  <span>Se desbloqueará el {unlockDate}</span>
+                </div>
+              )}
+              {isTestUser && (
+                <div className="mt-2 text-sm text-blue-500 dark:text-blue-400 flex items-center gap-1">
+                  <span>Usuario de prueba - Progreso normal</span>
+                </div>
+              )}
             </CardHeader>
 
             <CardContent>
@@ -89,7 +131,7 @@ export function WeeksList({ weeks, userProgress }: WeeksListProps) {
                   <h3 className="text-sm font-medium">Temas de la semana:</h3>
                   <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
                     {week.topics.map((topic, index) => (
-                      <li key={index}>{topic}</li>
+                      <li key={index}>{topic.title}</li>
                     ))}
                   </ul>
                 </div>

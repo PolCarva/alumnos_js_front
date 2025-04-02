@@ -4,13 +4,20 @@ export interface User {
   username: string
   password: string // En una aplicación real, esto sería un hash
   class?: 'M' | 'L' | 'V'
+  isTestUser?: boolean
 }
 
 export interface Week {
   id: number
   title: string
   description: string
-  topics: string[]
+  topics: {
+    id: number
+    title: string
+    description: string
+    questions: number[]
+  }[]
+  unlockDate: string // ISO date string
 }
 
 export interface TestCase {

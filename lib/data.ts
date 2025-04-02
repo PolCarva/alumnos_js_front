@@ -4,66 +4,206 @@ import type { Week, Question, UserProgress } from "./types"
 import { saveQuestionProgress as apiSaveQuestionProgress } from "./api"
 
 // Datos de semanas
-const weeks: Week[] = [
+export const weeks: Week[] = [
   {
     id: 1,
-    title: "Variables",
-    description: "Fundamentos básicos del lenguaje JavaScript",
-    topics: ["variables", "constantes", "const", "let", "var"]
+    title: "Introducción a JavaScript",
+    description: "Conceptos básicos de JavaScript, variables, tipos de datos y operadores.",
+    unlockDate: "2025-03-17T03:00:00.000Z",
+    topics: [
+      {
+        id: 1,
+        title: "Variables y Tipos de Datos",
+        description: "Aprende sobre variables, tipos de datos y cómo declararlos en JavaScript.",
+        questions: [1, 2, 3]
+      },
+      {
+        id: 2,
+        title: "Operadores",
+        description: "Explora los diferentes operadores en JavaScript y cómo usarlos.",
+        questions: [4, 5, 6]
+      }
+    ]
   },
   {
     id: 2,
-    title: "Condicionales",
-    description: "Estructuras de control en JavaScript",
-    topics: ["if", "else", "switch", "condiciones", "comparaciones"],
+    title: "Control de Flujo",
+    description: "Aprende sobre estructuras de control como if, else, switch y bucles.",
+    unlockDate: "2025-03-24T03:00:00.000Z",
+    topics: [
+      {
+        id: 3,
+        title: "Condicionales",
+        description: "Aprende a usar if, else, else if y switch para controlar el flujo de tu código.",
+        questions: [7, 8, 9]
+      },
+      {
+        id: 4,
+        title: "Bucles",
+        description: "Explora los diferentes tipos de bucles en JavaScript: for, while, do...while.",
+        questions: [10, 11, 12]
+      }
+    ]
   },
   {
     id: 3,
-    title: "Repetitivas",
-    description: "Estructuras de control en JavaScript",
-    topics: ["for", "while", "bucles", "iteraciones"],
+    title: "Funciones",
+    description: "Aprende a crear y usar funciones en JavaScript.",
+    unlockDate: "2025-03-31T03:00:00.000Z",
+    topics: [
+      {
+        id: 5,
+        title: "Declaración de Funciones",
+        description: "Aprende diferentes formas de declarar funciones en JavaScript.",
+        questions: [13, 14, 15]
+      },
+      {
+        id: 6,
+        title: "Parámetros y Retorno",
+        description: "Explora cómo pasar parámetros a funciones y obtener valores de retorno.",
+        questions: [16, 17, 18]
+      }
+    ]
   },
   {
     id: 4,
-    title: "Funciones",
-    description: "Conceptos básicos de funciones en JavaScript",
-    topics: ["function", "return", "parametros", "llamadas"],
+    title: "Arrays",
+    description: "Aprende a trabajar con arrays en JavaScript.",
+    unlockDate: "2025-04-07T03:00:00.000Z",
+    topics: [
+      {
+        id: 7,
+        title: "Creación y Acceso",
+        description: "Aprende a crear arrays y acceder a sus elementos.",
+        questions: [19, 20, 21]
+      },
+      {
+        id: 8,
+        title: "Métodos de Array",
+        description: "Explora los métodos más comunes para manipular arrays.",
+        questions: [22, 23, 24]
+      }
+    ]
   },
   {
     id: 5,
-    title: "Objetos nativos",
-    description: "Objetos nativos de JavaScript",
-    topics: ["Math", "Date", "Array", "String", "Object"],
+    title: "Objetos",
+    description: "Aprende a trabajar con objetos en JavaScript.",
+    unlockDate: "2025-04-14T03:00:00.000Z",
+    topics: [
+      {
+        id: 9,
+        title: "Creación de Objetos",
+        description: "Aprende diferentes formas de crear objetos en JavaScript.",
+        questions: [25, 26, 27]
+      },
+      {
+        id: 10,
+        title: "Propiedades y Métodos",
+        description: "Explora cómo trabajar con propiedades y métodos de objetos.",
+        questions: [28, 29, 30]
+      }
+    ]
   },
   {
     id: 6,
-    title: "Arrays",
-    description: "Introducción a arrays en JavaScript",
-    topics: ["array", "push", "pop", "shift", "unshift"],
+    title: "DOM Manipulation",
+    description: "Aprende a manipular el DOM con JavaScript.",
+    unlockDate: "2025-04-21T03:00:00.000Z",
+    topics: [
+      {
+        id: 11,
+        title: "Selección de Elementos",
+        description: "Aprende a seleccionar elementos del DOM.",
+        questions: [31, 32, 33]
+      },
+      {
+        id: 12,
+        title: "Modificación del DOM",
+        description: "Explora cómo modificar elementos del DOM.",
+        questions: [34, 35, 36]
+      }
+    ]
   },
   {
     id: 7,
-    title: "Objetos",
-    description: "Introducción a objetos en JavaScript",
-    topics: ["object", "keys", "values", "entries"],
+    title: "Eventos",
+    description: "Aprende a trabajar con eventos en JavaScript.",
+    unlockDate: "2025-04-28T03:00:00.000Z",
+    topics: [
+      {
+        id: 13,
+        title: "Tipos de Eventos",
+        description: "Explora los diferentes tipos de eventos en JavaScript.",
+        questions: [37, 38, 39]
+      },
+      {
+        id: 14,
+        title: "Manejo de Eventos",
+        description: "Aprende a manejar eventos en JavaScript.",
+        questions: [40, 41, 42]
+      }
+    ]
   },
   {
     id: 8,
-    title: "Elementos del DOM",
-    description: "Introducción a elementos del DOM en JavaScript",
-    topics: ["document", "getElementById", "querySelector", "querySelectorAll"],
+    title: "Asincronía",
+    description: "Aprende sobre programación asíncrona en JavaScript.",
+    unlockDate: "2025-05-05T03:00:00.000Z",
+    topics: [
+      {
+        id: 15,
+        title: "Callbacks",
+        description: "Aprende a usar callbacks para manejar operaciones asíncronas.",
+        questions: [43, 44, 45]
+      },
+      {
+        id: 16,
+        title: "Promesas",
+        description: "Explora cómo trabajar con promesas en JavaScript.",
+        questions: [46, 47, 48]
+      }
+    ]
   },
   {
     id: 9,
-    title: "Eventos",
-    description: "Introducción a eventos en JavaScript",
-    topics: ["addEventListener", "removeEventListener", "event", "target"],
+    title: "APIs y Fetch",
+    description: "Aprende a consumir APIs usando fetch en JavaScript.",
+    unlockDate: "2025-05-12T03:00:00.000Z",
+    topics: [
+      {
+        id: 17,
+        title: "Introducción a APIs",
+        description: "Aprende los conceptos básicos de las APIs.",
+        questions: [49, 50, 51]
+      },
+      {
+        id: 18,
+        title: "Fetch API",
+        description: "Explora cómo usar la API Fetch para realizar peticiones HTTP.",
+        questions: [52, 53, 54]
+      }
+    ]
   },
   {
     id: 10,
-    title: "Fetch",
-    description: "Introducción a fetch en JavaScript",
-    topics: ["fetch", "then", "try", "catch", "async", "await"],
+    title: "Proyecto Final",
+    description: "Aplica todo lo aprendido en un proyecto práctico.",
+    unlockDate: "2025-05-19T03:00:00.000Z",
+    topics: [
+      {
+        id: 19,
+        title: "Planificación",
+        description: "Aprende a planificar tu proyecto final.",
+        questions: [55, 56, 57]
+      },
+      {
+        id: 20,
+        title: "Implementación",
+        description: "Implementa tu proyecto final aplicando todos los conceptos aprendidos.",
+        questions: [58, 59, 60]
+      }
+    ]
   }
 ]
 
@@ -539,9 +679,6 @@ const questions: Question[] = [
     buggyCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response)\n  .then(data => {\n    return data;\n  });\n}",
     correctCode: "function obtenerUsuarios() {\n  return fetch('https://jsonplaceholder.typicode.com/users')\n  .then(response => response.json())\n  .then(data => {\n    return data;\n  });\n}"
   }
-
-    
-
 ]
 
 // Datos de progreso de usuarios (inicialmente vacío)
@@ -841,52 +978,58 @@ function updateUserStats(userId: number, saveToStorage = true): void {
     // Obtener todos los IDs de semanas
     const allWeekIds = weeks.map(week => week.id);
     
-    // Asignar todas las semanas como completadas
-    userProgress.completedWeekIds = [...allWeekIds];
-    userProgress.completedWeeks = allWeekIds.length;
+    // Actualizar completedWeekIds con todas las semanas
+    userProgress.completedWeekIds = allWeekIds;
     
-    // No guardamos en localStorage para el usuario demo
+    // Calcular puntos totales
+    userProgress.totalPoints = userProgress.questionProgress.reduce((total, q) => total + q.points, 0);
+    
+    // Calcular preguntas completadas
+    userProgress.completedQuestions = userProgress.questionProgress.filter(q => q.completed).length;
+    
+    if (saveToStorage) {
+      saveToLocalStorage();
+    }
     return;
   }
+
+  // Para usuarios normales, calcular las semanas completadas
+  const now = new Date();
+  const completedWeeks: number[] = [];
   
-  // Para usuarios normales, calcular como siempre
+  weeks.forEach(week => {
+    // Verificar si la fecha actual es posterior a la fecha de desbloqueo
+    const unlockDate = new Date(week.unlockDate);
+    if (now < unlockDate) return; // Si la semana aún no está desbloqueada, no la marcamos como completada
+    
+    // Obtener todas las preguntas para esta semana
+    const weekQuestions = getQuestionsForWeek(week.id);
+    
+    // Verificar si todas las preguntas han sido intentadas (completadas o fallidas)
+    const allQuestionsAttempted = weekQuestions.every(question => {
+      return userProgress.questionProgress.some(
+        progress => progress.questionId === question.id && 
+                   progress.weekId === week.id && 
+                   (progress.completed || progress.failed)
+      );
+    });
+    
+    if (allQuestionsAttempted) {
+      completedWeeks.push(week.id);
+    }
+  });
+  
+  // Actualizar completedWeekIds
+  userProgress.completedWeekIds = completedWeeks;
   
   // Calcular puntos totales
-  userProgress.totalPoints = userProgress.questionProgress.reduce((total, progress) => total + progress.points, 0)
-
-  // Calcular preguntas completadas (solo las correctas)
-  userProgress.completedQuestions = userProgress.questionProgress.filter((progress) => progress.completed).length
-
-  // Calcular semanas completadas
-  const weekIds = weeks.map((week) => week.id)
-  const completedWeekIds: number[] = []
-
-  for (const weekId of weekIds) {
-    const weekQuestions = questions.filter((q) => q.weekId === weekId)
-
-    // Considerar una pregunta como intentada si está completada O fallada
-    const attemptedQuestions = userProgress.questionProgress.filter(
-      (p) => p.weekId === weekId && (p.completed || p.failed),
-    )
-
-    // Una semana está completada si todas sus preguntas han sido intentadas
-    if (weekQuestions.length > 0 && attemptedQuestions.length === weekQuestions.length) {
-      completedWeekIds.push(weekId)
-    }
-  }
-
-  userProgress.completedWeekIds = completedWeekIds
-  userProgress.completedWeeks = completedWeekIds.length
-
-  // Actualizar en la lista de usuarios
-  const userIndex = usersProgress.findIndex((p) => p.userId === userId)
-  if (userIndex !== -1) {
-    usersProgress[userIndex] = userProgress
-  }
+  userProgress.totalPoints = userProgress.questionProgress.reduce((total, q) => total + q.points, 0);
   
-  // Guardar en localStorage solo si es necesario
+  // Calcular preguntas completadas
+  userProgress.completedQuestions = userProgress.questionProgress.filter(q => q.completed).length;
+  
   if (saveToStorage) {
-    saveToLocalStorage()
+    saveToLocalStorage();
   }
 }
 
