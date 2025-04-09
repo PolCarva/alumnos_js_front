@@ -390,6 +390,13 @@ const dummyUsers: User[] = [
     class: "L"
   },
   {
+    id: 56,
+    name: "Mariana Galli",
+    username: "268977",
+    password: "55214804",
+    class: "M"
+  },
+  {
     id: 99,
     name: "Pablo Carvalho",
     username: "269215",
