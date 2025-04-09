@@ -147,7 +147,7 @@ export function LoginForm() {
             <Label htmlFor="username">Número de alumno</Label>
             <Input
               id="username"
-              placeholder="Ej: 328063"
+              placeholder="Ej: 269215"
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value)
@@ -163,7 +163,7 @@ export function LoginForm() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Ej: 55585968"
+                placeholder="Ej: 55551234"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value)
