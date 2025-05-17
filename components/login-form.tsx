@@ -202,7 +202,7 @@ export function LoginForm() {
         </CardFooter>
         <div className="text-sm text-gray-500 text-center pb-5 space-y-1">
           <p><b>Usuario de prueba:</b> demo</p>
-          <p><b>Contraseña de prueba:</b> password</p>
+          <p><b>Contraseña de prueba:</b> admin123</p>
         </div>
       </form>
     </Card>
